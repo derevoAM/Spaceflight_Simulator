@@ -22,11 +22,13 @@ class Entity:
 
 
 class Engine(Entity):
-    def __init__(self, surface, x, y, power, vx=0, vy=0, size=1):
+    def __init__(self, surface, x, y, power, consumption, vx=0, vy=0, size=1):
         Entity.__init__(self, surface, x, y)
         self.power = power
+        self.consumption = consumption
         self.output = 100
         self.power_on = 0
+
 
 
 class FuelTank(Entity):
@@ -46,4 +48,6 @@ class Conector(Entity):
     def __init__(self, surface, x, y, vx=0, vy=0, size=1):
         Entity.__init__(self, surface, x, y)
         self.double = 1
+        self.left = 0
 
+        
