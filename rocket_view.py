@@ -1,3 +1,4 @@
+# rocket point of view
 import pygame
 
 BLUE = [0, 42, 255]
