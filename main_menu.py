@@ -1,12 +1,16 @@
 import pygame, sys
 
+import vlc
 pygame.init()
-
 SCREEN = pygame.display.set_mode((1920, 1080))
 pygame.display.toggle_fullscreen()
 pygame.display.set_caption("Menu")
 
 BG = pygame.image.load("Textures/menu/background.png")
+
+sound_file = vlc.MediaPlayer("Textures/menu/Trava_u_doma.mp3")
+sound_file.play()
+
 
 
 class Button():
