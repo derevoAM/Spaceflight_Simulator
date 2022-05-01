@@ -1,7 +1,3 @@
-# Need to choose the library to draw the interface: Pygame, Cocos2D, PyOpenGl, Arcade...
-# Pyglet
-
-from random import randint
 import pygame.draw as dr
 import pygame
 import math
