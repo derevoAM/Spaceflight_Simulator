@@ -159,19 +159,16 @@ while position_and_velocity_log[counter][2] >= 0:
     counter += 1
     position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, first_stage,
                                                    heading, engine_is_on, const)
-    print(counter)
-    print(position_and_velocity_log[counter])
     time_log[counter] = time_log[counter - 1] + step_time
 
 heading = np.array([0, 1])
 heading = heading / np.linalg.norm(heading)
 
-while not second_stage.is_empty():
+while counter < 2000:
     counter += 1
     position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, second_stage,
                                                    heading, engine_is_on, const)
-    print(counter)
-    print(position_and_velocity_log[counter])
+
     time_log[counter] = time_log[counter - 1] + step_time
 
 fig, ax = plt.subplots()
