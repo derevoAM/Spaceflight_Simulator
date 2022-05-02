@@ -12,8 +12,8 @@ class Rocket:
     def __init__(self):
         self.grid_x = 30
         self.grid_y = 20
-        self.block_x = 10
-        self.block_y = 10
+        self.block_x = 100
+        self.block_y = 100
         self.width = self.grid_x * self.block_x
         self.height = self.grid_y * self.block_y
         self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
@@ -64,13 +64,39 @@ class Rocket:
         for part_entity in self.parts:
             part_entity.draw()
 
+def load_rocket(sourcefile):
+    rocket_entity = Rocket()
+    with open(sourcefile, "r") as f:
+        part_lines = f.readlines()
+    for part_line in part_lines:
+        part_line_array = part_line.split()
+        part_type = part_line_array[0]
+        print(part_type, part_line_array[1], part_line_array[2])
+        if part_type == "engine":
+            #А другие параметры не волнуют, ракету мы загружаем только при старте
+            part_entity = p.Engine(0, x =int(part_line_array[1]), y = int(part_line_array[2]))
+        elif part_type == "fueltank":
+            part_entity = p.FuelTank(0, x=int(part_line_array[1]), y=int(part_line_array[2]))
+        elif part_type == "cabin":
+            part_entity = p.Cabin(0, x=int(part_line_array[1]), y=int(part_line_array[2]))
+        rocket_entity.add_part(part_entity)
+    return rocket_entity
+
+def save_rocket(rocket_entity, outfile):
+    with open(outfile, "w") as file:
+        for part_entity in rocket_entity.parts:
+            file.write(str(part_entity.type) + " " + str(part_entity.x) + " " + str(part_entity.y) + "\n")
+
+
+'''
 screen = pygame.display.set_mode((900, 900))
 engine = p.Engine(0, x = 4, y = 140)
-r = Rocket()
-r.add_part(engine)
+r = load_rocket("rockets/test.txt")
+save_rocket(r, "rockets/test_save.txt")
+#r.add_part(engine)
 #r.recount()
-r.draw(gridded=1)
-screen.blit(r.get_surface(), dest=[100,100])
+r.draw(gridded=0)
+screen.blit(r.get_surface(), dest=[0,0])
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
@@ -81,6 +107,6 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
 
-pygame.quit()
+pygame.quit()'''
 
 
