@@ -55,15 +55,15 @@ def calc_acceleration_air(stage_parameters, stage, position_norm, velocity_norm,
         return np.zeros(2)
 
 
-def calc_acceleration_gravity(stage_parameters, stage, position_norm, constants):
+def calc_acceleration_earth(stage_parameters, position_norm, constants):
     return - constants.mu_Earth / position_norm ** 3 * stage_parameters[:2]
 
 
-def calc_acceleration_engine(stage_parameters, stage, velocity_norm, engine_is_on_flag):
+def calc_acceleration_engine(stage_parameters, stage, velocity_norm, rocket_heading, engine_is_on_flag):
     if engine_is_on_flag and not stage.is_empty():
         if velocity_norm > 1e-8:
             return stage.fuel_consumption * stage.gas_exhaust_speed / stage.current_stage_mass \
-                   * stage_parameters[2:] / velocity_norm
+                   * rocket_heading
         else:
             return np.array([stage.fuel_consumption * stage.gas_exhaust_speed / stage.current_stage_mass, 0])
     else:
@@ -71,16 +71,17 @@ def calc_acceleration_engine(stage_parameters, stage, velocity_norm, engine_is_o
 
 
 def calc_acceleration_moon(stage_parameters, constants):
-    rad_moon_ka = stage_parameters[:2] - calc_moon_position(time[counter], constants)
+    rad_moon_ka = stage_parameters[:2] - calc_moon_position(time_log[counter], constants)
 
     return - constants.mu_moon * rad_moon_ka / (np.linalg.norm(rad_moon_ka)) ** 3
 
 
-def calc_acceleration(stage_parameters, stage, engine_is_on_flag, constants):
+def calc_acceleration(stage_parameters, stage, rocket_heading, engine_is_on_flag, constants):
     """
     считает ускорение КА
     :param stage_parameters: массив (x, y, Vx, Vy)
     :param stage: параметры ступени
+    :param rocket_heading: angle of the rocket
     :param engine_is_on_flag: включен ли двигатель
     :param constants: constants
     :return: массив (ax, ay)
@@ -90,18 +91,21 @@ def calc_acceleration(stage_parameters, stage, engine_is_on_flag, constants):
 
     acceleration_air = calc_acceleration_air(stage_parameters, stage, position_norm, velocity_norm, constants)
 
-    acceleration_gravity = calc_acceleration_gravity(stage_parameters, stage, position_norm, constants)
+    acceleration_gravity = calc_acceleration_earth(stage_parameters, position_norm, constants)
 
-    acceleration_engine = calc_acceleration_engine(stage_parameters, stage, velocity_norm, engine_is_on_flag)
+    acceleration_engine = calc_acceleration_engine(stage_parameters, stage, velocity_norm, rocket_heading,
+                                                   engine_is_on_flag)
 
     acceleration_moon = calc_acceleration_moon(stage_parameters, constants)
+
+    print(acceleration_gravity)
 
     return acceleration_air + acceleration_gravity + acceleration_engine + acceleration_moon
 
 
-def calc_differential(stage_parameters, stage, engine_is_on_flag, constants):
+def calc_differential(stage_parameters, stage, rocket_heading, engine_is_on_flag, constants):
     """ вычисляет дифференциал функции (промежутчная функция метода Рунге-Кутта) """
-    total_acceleration = calc_acceleration(stage_parameters, stage, engine_is_on_flag, constants)
+    total_acceleration = calc_acceleration(stage_parameters, stage, rocket_heading, engine_is_on_flag, constants)
 
     return np.array([stage_parameters[2], stage_parameters[3], total_acceleration[0], total_acceleration[1]])
 
@@ -111,20 +115,21 @@ def reduce_stage_mass(stage, step):
         stage.current_stage_mass -= stage.fuel_consumption * step
 
 
-def calc_step(stage_parameters, step, stage, engine_is_on_flag, constants):
+def calc_step(stage_parameters, step, stage, rocket_heading, engine_is_on_flag, constants):
     """
     основная функция расчета шага
     :param stage_parameters: массив (x, y, Vx, Vy) на предыдущем шаге
     :param step: время одного шага
     :param stage: параметры ступени
+    :param rocket_heading: vector heading
     :param engine_is_on_flag: включен ли двигатель
     :param constants : const
     :return: массив (x, y, Vx, Vy) на текущем шаге
     """
-    k_1 = calc_differential(stage_parameters, stage, engine_is_on_flag, constants)
-    k_2 = calc_differential(stage_parameters + 0.5 * step * k_1, stage, engine_is_on_flag, constants)
-    k_3 = calc_differential(stage_parameters + 0.5 * step * k_2, stage, engine_is_on_flag, constants)
-    k_4 = calc_differential(stage_parameters + step * k_3, stage, engine_is_on_flag, constants)
+    k_1 = calc_differential(stage_parameters, stage, rocket_heading, engine_is_on_flag, constants)
+    k_2 = calc_differential(stage_parameters + 0.5 * step * k_1, stage, rocket_heading, engine_is_on_flag, constants)
+    k_3 = calc_differential(stage_parameters + 0.5 * step * k_2, stage, rocket_heading, engine_is_on_flag, constants)
+    k_4 = calc_differential(stage_parameters + step * k_3, stage, rocket_heading, engine_is_on_flag, constants)
 
     reduce_stage_mass(stage, step)
 
@@ -134,27 +139,32 @@ def calc_step(stage_parameters, step, stage, engine_is_on_flag, constants):
 size = 500000
 const = Constants()
 
-pos_vel = np.ndarray(shape=(size, 4), dtype=float)
-pos_vel[0] = np.array([const.rad_Earth, 0, 0, 0])  # основной массив (x, y, Vx, Vy)
-time = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
-dtime = 5  # шаг расчета
+position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
+position_and_velocity_log[0] = np.array([const.rad_Earth, 0, 0, 0])  # основной массив (x, y, Vx, Vy)
+time_log = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
+step_time = 5  # шаг расчета
 counter = 0  # счетчик
-alpha = 75 / 180 * np.pi  # угол, на который отклонится аппарат после отделения первой ступени (нужно подогнать)
 
 first_stage = Stage(30000, 80000, 4000, 300)  # параметры первой ступени
 second_stage = Stage(2000, first_stage.payload_mass, 3000, 200)  # параметры второй ступени
 third_stage = Stage(5, second_stage.payload_mass, 265, 50)  # параметры третьей ступени
 
-while counter < 1000:
+engine_is_on = True
+heading = np.array([8, 2])
+heading = heading / np.linalg.norm(heading)
+
+while position_and_velocity_log[counter][2] >= 0:
     counter += 1
-    pos_vel[counter] = calc_step(pos_vel[counter - 1], dtime, first_stage, True, const)
-    print(pos_vel[counter])
-    time[counter] = time[counter - 1] + dtime
+    position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, first_stage,
+                                                   heading, engine_is_on, const)
+    print(counter)
+    print(position_and_velocity_log[counter])
+    time_log[counter] = time_log[counter - 1] + step_time
 
 fig, ax = plt.subplots()
 plt.axis('equal')
 ax.add_patch(plt.Circle((0, 0), const.rad_Earth))
 
-ax.plot(pos_vel[:counter, 0], pos_vel[:counter, 1], color="black", linewidth=4)
+ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=4)
 
 plt.show()
