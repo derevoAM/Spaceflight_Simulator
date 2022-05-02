@@ -134,14 +134,38 @@ def calc_step(stage_parameters, step, stage, rocket_heading, engine_is_on_flag, 
     return stage_parameters + (k_1 + 2 * (k_2 + k_3) + k_4) * step / 6
 
 
-def process_step(rocket_parts_array):
-    pass
+def calc_differential_euler(predicative_stage_parameters, constants):
+    total_acceleration = calc_acceleration_earth(predicative_stage_parameters,
+                                                 np.linalg.norm(predicative_stage_parameters[:2]),
+                                                 constants) + calc_acceleration_moon(predicative_stage_parameters,
+                                                                                     constants)
+
+    return np.array([predicative_stage_parameters[2], predicative_stage_parameters[3], total_acceleration[0],
+                     total_acceleration[1]])
+
+
+def calc_step_euler(predicative_stage_parameters, step, constants):
+    return predicative_stage_parameters + calc_differential_euler(predicative_stage_parameters, constants) * step
+
+
+def calc_predicative_orbit(stage_parameters, step, constants):
+    log_size = 500
+    predicative_orbit = np.ndarray(shape=(log_size, 4), dtype=float)
+    predicative_orbit[0] = stage_parameters
+    count = 0
+
+    while count < log_size - 1:
+        count += 1
+        predicative_orbit[count] = calc_step_euler(predicative_orbit[count - 1], step, constants)
+
+    return predicative_orbit
 
 
 size = 500000
 const = Constants()
 
 position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
+predicative_orbit_log = np.ndarray(shape=(500, 4), dtype=float)
 position_and_velocity_log[0] = np.array([const.rad_Earth, 0, 0, 0])  # основной массив (x, y, Vx, Vy)
 time_log = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
 step_time = 5  # шаг расчета
@@ -159,22 +183,27 @@ while position_and_velocity_log[counter][2] >= 0:
     counter += 1
     position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, first_stage,
                                                    heading, engine_is_on, const)
+    predicative_orbit_log = calc_predicative_orbit(position_and_velocity_log[counter - 1], 1.5 * step_time, const)
+
     time_log[counter] = time_log[counter - 1] + step_time
 
 heading = np.array([0, 1])
 heading = heading / np.linalg.norm(heading)
 
-while counter < 2000:
+while counter < 1000:
     counter += 1
     position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, second_stage,
                                                    heading, engine_is_on, const)
 
+    predicative_orbit_log = calc_predicative_orbit(position_and_velocity_log[counter - 1], 1.5 * step_time, const)
+
     time_log[counter] = time_log[counter - 1] + step_time
+
 
 fig, ax = plt.subplots()
 plt.axis('equal')
 ax.add_patch(plt.Circle((0, 0), const.rad_Earth))
-
 ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=4)
+ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
 
 plt.show()
