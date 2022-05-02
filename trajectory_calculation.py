@@ -1,7 +1,7 @@
 # Calculating the trajectory of a rocket
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Constants:
@@ -59,7 +59,7 @@ def calc_acceleration_earth(stage_parameters, position_norm, constants):
     return - constants.mu_Earth / position_norm ** 3 * stage_parameters[:2]
 
 
-def calc_acceleration_engine(stage_parameters, stage, velocity_norm, rocket_heading, engine_is_on_flag):
+def calc_acceleration_engine(stage, velocity_norm, rocket_heading, engine_is_on_flag):
     if engine_is_on_flag and not stage.is_empty():
         if velocity_norm > 1e-8:
             return stage.fuel_consumption * stage.gas_exhaust_speed / stage.current_stage_mass \
@@ -93,12 +93,10 @@ def calc_acceleration(stage_parameters, stage, rocket_heading, engine_is_on_flag
 
     acceleration_gravity = calc_acceleration_earth(stage_parameters, position_norm, constants)
 
-    acceleration_engine = calc_acceleration_engine(stage_parameters, stage, velocity_norm, rocket_heading,
+    acceleration_engine = calc_acceleration_engine(stage, velocity_norm, rocket_heading,
                                                    engine_is_on_flag)
 
     acceleration_moon = calc_acceleration_moon(stage_parameters, constants)
-
-    print(acceleration_gravity)
 
     return acceleration_air + acceleration_gravity + acceleration_engine + acceleration_moon
 
@@ -136,6 +134,10 @@ def calc_step(stage_parameters, step, stage, rocket_heading, engine_is_on_flag, 
     return stage_parameters + (k_1 + 2 * (k_2 + k_3) + k_4) * step / 6
 
 
+def process_step(rocket_parts_array):
+    pass
+
+
 size = 500000
 const = Constants()
 
@@ -156,6 +158,17 @@ heading = heading / np.linalg.norm(heading)
 while position_and_velocity_log[counter][2] >= 0:
     counter += 1
     position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, first_stage,
+                                                   heading, engine_is_on, const)
+    print(counter)
+    print(position_and_velocity_log[counter])
+    time_log[counter] = time_log[counter - 1] + step_time
+
+heading = np.array([0, 1])
+heading = heading / np.linalg.norm(heading)
+
+while not second_stage.is_empty():
+    counter += 1
+    position_and_velocity_log[counter] = calc_step(position_and_velocity_log[counter - 1], step_time, second_stage,
                                                    heading, engine_is_on, const)
     print(counter)
     print(position_and_velocity_log[counter])
