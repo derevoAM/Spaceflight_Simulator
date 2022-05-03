@@ -1,12 +1,17 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import pygame
-import textures as t
-import parts as p
 import pygame.draw as dr
+
+# import textures as t
+import parts as p
+# объявили экран, на котором будем рисовать
+# rocket_image = pygame.Surface([ROCKETWINDOWWIDTH, ROCKETWINDOWHEIGHT], pygame.SRCALPHA)
+import trajectory_calculation
+
 
 # Этот файл просто возвращает холст с нарисованной ракетой
 
-# объявили экран, на котором будем рисовать
-#rocket_image = pygame.Surface([ROCKETWINDOWWIDTH, ROCKETWINDOWHEIGHT], pygame.SRCALPHA)
 
 class Rocket:
     def __init__(self):
@@ -18,7 +23,36 @@ class Rocket:
         self.height = self.grid_y * self.block_y
         self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
         self.parts = []
+        ##########
+        self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
 
+    def activate_stage(self):
+        self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
+
+    def activate_all(self):
+        for part in self.parts:
+            part.active = True
+
+    def get_active_parameters(self):
+        initial_mass = 0
+        exhaust_speed = 0
+        fuel_consumption = 0
+        capacity = 0
+        fuel = 0
+
+        for part in self.parts:
+            initial_mass += part.mass
+            if part.type == "fueltank" and part.active:
+                capacity += part.capacity
+                fuel += part.fuel
+
+            elif part.type == "engine" and part.active:
+                exhaust_speed = part.output * part.power
+                fuel_consumption = part.output * part.comsumption
+
+        return initial_mass, exhaust_speed, fuel_consumption, capacity, fuel
+
+    ###################
     def add_part(self, part_entity):
         """
         В деталях заранее прописаны координаты
@@ -56,13 +90,14 @@ class Rocket:
         for i in range(self.block_x + 1):
             dr.line(self.surface, grey, (i * self.grid_x, 0), (i * self.grid_x, self.height))
         for j in range(self.block_y + 1):
-            dr.line(self.surface, grey, (0,j * self.grid_y), (self.width, j * self.grid_y))
+            dr.line(self.surface, grey, (0, j * self.grid_y), (self.width, j * self.grid_y))
 
-    def draw(self, gridded = 0):
+    def draw(self, gridded=0):
         if gridded:
             self.draw_grid()
         for part_entity in self.parts:
             part_entity.draw()
+
 
 def load_rocket(sourcefile):
     rocket_entity = Rocket()
@@ -73,14 +108,15 @@ def load_rocket(sourcefile):
         part_type = part_line_array[0]
         print(part_type, part_line_array[1], part_line_array[2])
         if part_type == "engine":
-            #А другие параметры не волнуют, ракету мы загружаем только при старте
-            part_entity = p.Engine(0, x =int(part_line_array[1]), y = int(part_line_array[2]))
+            # А другие параметры не волнуют, ракету мы загружаем только при старте
+            part_entity = p.Engine(0, x=int(part_line_array[1]), y=int(part_line_array[2]))
         elif part_type == "fueltank":
             part_entity = p.FuelTank(0, x=int(part_line_array[1]), y=int(part_line_array[2]))
         elif part_type == "cabin":
             part_entity = p.Cabin(0, x=int(part_line_array[1]), y=int(part_line_array[2]))
         rocket_entity.add_part(part_entity)
     return rocket_entity
+
 
 def save_rocket(rocket_entity, outfile):
     with open(outfile, "w") as file:
@@ -109,4 +145,63 @@ while not finished:
 
 pygame.quit()'''
 
+## Тестирую на совместимость!
 
+rocket = load_rocket("rockets/test.txt")
+
+rocket.activate_all()
+
+rocket.activate_stage()
+
+rocket.active_stage = trajectory_calculation.Stage([80000, 4000, 300, 50000, 50000])
+
+size = 500000
+const = trajectory_calculation.Constants()
+
+position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
+
+predicative_orbit_log = np.ndarray(shape=(500, 4), dtype=float)
+position_and_velocity_log[0] = np.array([const.rad_Earth, 0, 0, 0])  # основной массив (x, y, Vx, Vy)
+time_log = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
+step_time = 5  # шаг расчета
+counter = 0  # счетчик
+
+engine_is_on = True
+heading = np.array([8, 2])
+heading = heading / np.linalg.norm(heading)
+
+while position_and_velocity_log[counter][2] >= 0:
+    counter += 1
+    position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
+        position_and_velocity_log[counter - 1], step_time,
+        rocket.active_stage,
+        heading, engine_is_on, time_log[counter - 1],
+        const)
+    predicative_orbit_log = trajectory_calculation.calc_predicative_orbit(position_and_velocity_log[counter - 1],
+                                                                          2 * step_time,
+                                                                          time_log[counter - 1], const)
+
+heading = np.array([0, 1])
+heading = heading / np.linalg.norm(heading)
+
+rocket.active_stage = trajectory_calculation.Stage([30000, 3000, 200, 28000, 28000])
+
+while counter < 1000:
+    counter += 1
+    position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
+        position_and_velocity_log[counter - 1], step_time,
+        rocket.active_stage,
+        heading, engine_is_on, time_log[counter - 1],
+        const)
+
+    predicative_orbit_log = trajectory_calculation.calc_predicative_orbit(position_and_velocity_log[counter - 1],
+                                                                          5 * step_time,
+                                                                          time_log[counter - 1], const)
+
+fig, ax = plt.subplots()
+plt.axis('equal')
+ax.add_patch(plt.Circle((0, 0), const.rad_Earth))
+ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=4)
+ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
+
+plt.show()
