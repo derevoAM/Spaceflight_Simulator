@@ -2,6 +2,7 @@
 import pygame
 # import trajectory_calculation as tr
 import rocket_view as r_v
+import sandbox as s_b
 
 SKY = [0, 42, 255]
 GREEN = [0, 255, 0]
@@ -18,7 +19,7 @@ def parameters(arr, it):
     y = arr[1]
     t = font.render(f"Time = " + str(it) + "c", True, [0, 0, 0])
     speed = font.render(f"Speed = {((arr[2]**2 + arr[3]**2)**0.5):.2f} м/c", True, [0, 0, 0])
-    height = font.render(f"Height = {((x ** 2 + y ** 2) ** 0.5 - r_v.tr.const.rad_Earth)/1000:.2f} км", True, [0, 0, 0])
+    height = font.render(f"Height = {((x ** 2 + y ** 2) ** 0.5 - s_b.constants.rad_Earth)/1000:.2f} км", True, [0, 0, 0])
     parameters_view.blit(speed, (r_v.w / 4 - 100, 100))
     parameters_view.blit(height, (r_v.w / 4 - 100, 60))
     parameters_view.blit(t, (r_v.w / 4 - 100, 20))
