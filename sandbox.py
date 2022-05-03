@@ -14,6 +14,11 @@ import trajectory_calculation
 
 
 class Rocket:
+    """
+    Класс ракеты. Идея состоит в том, что ракета представляет собой виртуальный холст
+    с нарисованными деталями в нужном порядке, который подаётся в основную программу
+    и уже там с ним производятся манипуляции в виде сжатия, поворота и т п
+    """
     def __init__(self):
         self.grid_x = 30
         self.grid_y = 20
@@ -25,6 +30,7 @@ class Rocket:
         self.parts = []
         ##########
         self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
+        self.parameters = np.array([0.0, 0, 0, 0])
 
     def activate_stage(self):
         self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
@@ -44,11 +50,11 @@ class Rocket:
             initial_mass += part.mass
             if part.type == "fueltank" and part.active:
                 capacity += part.capacity
-                fuel += part.fuel
+                fuel += part.capacity * part.fullness
 
             elif part.type == "engine" and part.active:
                 exhaust_speed = part.output * part.power
-                fuel_consumption = part.output * part.comsumption
+                fuel_consumption = part.output * part.consumption
 
         return initial_mass, exhaust_speed, fuel_consumption, capacity, fuel
 
@@ -146,6 +152,7 @@ while not finished:
 pygame.quit()'''
 
 ## Тестирую на совместимость!
+
 
 rocket = load_rocket("rockets/test.txt")
 

@@ -262,7 +262,7 @@ def calc_predicative_orbit(stage_parameters, step, time, constants):
     return predicative_orbit
 
 
-size = 500000
+"""size = 500000
 const = Constants()
 
 position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
@@ -310,4 +310,4 @@ ax.add_patch(plt.Circle((0, 0), const.rad_Earth))
 ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=4)
 ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
 
-plt.show()
+plt.show()"""
