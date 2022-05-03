@@ -1,15 +1,15 @@
 import pygame, sys
 
-import vlc
+#import vlc
 pygame.init()
-SCREEN = pygame.display.set_mode((1920, 1080))
-pygame.display.toggle_fullscreen()
-pygame.display.set_caption("Menu")
+# SCREEN = pygame.display.set_mode((1920, 1080))
+# pygame.display.toggle_fullscreen()
+# pygame.display.set_caption("Menu")
 
 BG = pygame.image.load("Textures/menu/background.png")
 
-sound_file = vlc.MediaPlayer("Textures/menu/Trava_u_doma.mp3")
-sound_file.play()
+#sound_file = vlc.MediaPlayer("Textures/menu/Trava_u_doma.mp3")
+#sound_file.play()
 
 
 
@@ -54,8 +54,7 @@ class Button():
 def get_font(size):  # Returns Press-Start-2P in the desired size
     return pygame.font.Font("Textures/menu/font.ttf", size)
 
-
-def play():
+'''def play():
     while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
@@ -106,45 +105,44 @@ def options():
                 if OPTIONS_BACK.checkForInput(OPTIONS_MOUSE_POS):
                     main_menu()
 
-        pygame.display.update()
+        pygame.display.update()'''
 
 
-def main_menu():
-    while True:
-        SCREEN.blit(BG, (0, 0))
 
-        MENU_MOUSE_POS = pygame.mouse.get_pos()
+def main_menu(SCREEN, flag):
+    SCREEN.blit(BG, (0, 0))
 
-        MENU_TEXT = get_font(100).render("MAIN MENU", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(960, 150))
+    MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        PLAY_BUTTON = Button(image=pygame.image.load("Textures/menu/Play Rect.png"), pos=(960, 375),
-                             text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        OPTIONS_BUTTON = Button(image=pygame.image.load("Textures/menu/Options Rect.png"), pos=(960, 600),
-                                text_input="OPTIONS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load("Textures/menu/Quit Rect.png"), pos=(960, 825),
-                             text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+    MENU_TEXT = get_font(100).render("MAIN MENU", True, "#b68f40")
+    MENU_RECT = MENU_TEXT.get_rect(center=(960, 150))
 
-        SCREEN.blit(MENU_TEXT, MENU_RECT)
+    PLAY_BUTTON = Button(image=pygame.image.load("Textures/menu/Play Rect.png"), pos=(960, 375),
+                         text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+    OPTIONS_BUTTON = Button(image=pygame.image.load("Textures/menu/Options Rect.png"), pos=(960, 600),
+                            text_input="OPTIONS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+    QUIT_BUTTON = Button(image=pygame.image.load("Textures/menu/Quit Rect.png"), pos=(960, 825),
+                         text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
 
-        for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
-            button.changeColor(MENU_MOUSE_POS)
-            button.update(SCREEN)
+    SCREEN.blit(MENU_TEXT, MENU_RECT)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
+        button.changeColor(MENU_MOUSE_POS)
+        button.update(SCREEN)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                flag = 1
+                SCREEN.fill((0, 0, 0, 0))
+            if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    play()
-                if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    options()
-                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    pygame.quit()
-                    sys.exit()
+            if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                pygame.quit()
+                sys.exit()
+    return flag
 
-        pygame.display.update()
-
-
-main_menu()
