@@ -13,6 +13,7 @@ import trajectory_calculation
 # Этот файл просто возвращает холст с нарисованной ракетой
 
 
+
 class Rocket:
     """
     Класс ракеты. Идея состоит в том, что ракета представляет собой виртуальный холст
@@ -31,6 +32,8 @@ class Rocket:
         ##########
         self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
         self.parameters = np.array([0.0, 0, 0, 0])
+        self.direction = np.array([1.0, 0])
+        self.predicative_orbit = np.ndarray(shape=(100, 4), dtype=float)
 
     def activate_stage(self):
         self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
@@ -153,8 +156,11 @@ pygame.quit()'''
 
 ## Тестирую на совместимость!
 
+constants = trajectory_calculation.Constants()
 
 rocket = load_rocket("rockets/test.txt")
+
+rocket.parameters = np.array([constants.rad_Earth, 0, 0, 0])
 
 rocket.activate_all()
 
@@ -176,34 +182,30 @@ counter = 0  # счетчик
 engine_is_on = True
 heading = np.array([8, 2])
 heading = heading / np.linalg.norm(heading)
+rocket.direction = heading
 
 while position_and_velocity_log[counter][2] >= 0:
     counter += 1
-    position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
+    """position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
         position_and_velocity_log[counter - 1], step_time,
         rocket.active_stage,
         heading, engine_is_on, time_log[counter - 1],
-        const)
-    predicative_orbit_log = trajectory_calculation.calc_predicative_orbit(position_and_velocity_log[counter - 1],
-                                                                          2 * step_time,
-                                                                          time_log[counter - 1], const)
+        const)"""
+    position_and_velocity_log[counter] = rocket.parameters
+    trajectory_calculation.process_step(rocket, step_time, engine_is_on, time_log[counter], constants)
+    predicative_orbit_log = rocket.predicative_orbit
 
 heading = np.array([0, 1])
 heading = heading / np.linalg.norm(heading)
+rocket.direction = heading
 
 rocket.active_stage = trajectory_calculation.Stage([30000, 3000, 200, 28000, 28000])
 
 while counter < 1000:
     counter += 1
-    position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
-        position_and_velocity_log[counter - 1], step_time,
-        rocket.active_stage,
-        heading, engine_is_on, time_log[counter - 1],
-        const)
-
-    predicative_orbit_log = trajectory_calculation.calc_predicative_orbit(position_and_velocity_log[counter - 1],
-                                                                          5 * step_time,
-                                                                          time_log[counter - 1], const)
+    position_and_velocity_log[counter] = rocket.parameters
+    trajectory_calculation.process_step(rocket, step_time, engine_is_on, time_log[counter], constants)
+    predicative_orbit_log = rocket.predicative_orbit
 
 fig, ax = plt.subplots()
 plt.axis('equal')

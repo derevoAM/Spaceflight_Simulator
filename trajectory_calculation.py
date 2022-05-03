@@ -1,6 +1,5 @@
 # Calculating the trajectory of a rocket
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -260,6 +259,15 @@ def calc_predicative_orbit(stage_parameters, step, time, constants):
                                                                       time_array[count - 1], constants)
 
     return predicative_orbit
+
+
+def process_step(rocket, step, engine_is_on_flag, current_time, constants):
+    rocket.parameters, new_time = calc_step(rocket.parameters, step, rocket.active_stage, rocket.direction,
+                                            engine_is_on_flag,
+                                            current_time, constants)
+    rocket.predicative_orbit = calc_predicative_orbit(rocket.parameters, 5 * step, current_time, constants)
+
+    return new_time
 
 
 """size = 500000
