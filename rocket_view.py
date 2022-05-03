@@ -13,11 +13,12 @@ w, h = pygame.display.get_surface().get_size()
 rocket_view = pygame.Surface((w / 2, h))
 rocket_view.fill(SKY)
 
-im_height = 0
-for part in sb.r.parts:
-    im_height += sb.r.parts[0].texture.get_rect().size[1]
 
-im_size = sb.r.parts[0].texture.get_rect().size
+im_height = 0
+for part in sb.rocket.parts:
+    im_height += sb.rocket.parts[0].texture.get_rect().size[1]
+
+im_size = sb.rocket.parts[0].texture.get_rect().size
 print(im_size)
 # pygame.draw.rect(rocket_view, GREEN, (0, h - 50, w / 2, 50))
 # pygame.draw.rect(rocket_view, GREY, (100, h - 100, w / 2 - 200, 50))
@@ -47,4 +48,4 @@ def rocket_position(arr):
         pygame.draw.rect(rocket_view, GREEN, (0, h - 50 + height * scale, w / 2, 50))
     if height * scale <= 100:
         pygame.draw.rect(rocket_view, GREY, (100, h - 100 + height * scale, w / 2 - 200, 50))
-    rocket_view.blit(sb.r.get_surface(), (w / 4 - im_size[0] / 2, h - 100 - im_height))
+    rocket_view.blit(sb.rocket.get_surface(), (w / 4 - im_size[0] / 2, h - 100 - im_height))
