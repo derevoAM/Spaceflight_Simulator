@@ -264,12 +264,12 @@ def calc_predicative_orbit(stage_parameters, step, time, constants):
 def process_step(rocket, step, engine_is_on_flag, current_time, constants):
     """
     Function to process step
-    :param rocket:
-    :param step:
-    :param engine_is_on_flag:
-    :param current_time:
-    :param constants:
-    :return:
+    :param rocket: rocket entity
+    :param step: time step
+    :param engine_is_on_flag: true if engine is working
+    :param current_time: global time
+    :param constants: class of constants
+    :return: new time
     """
     rocket.parameters, new_time = calc_step(rocket.parameters, step, rocket.active_stage, rocket.direction,
                                             engine_is_on_flag,
