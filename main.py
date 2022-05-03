@@ -28,10 +28,10 @@ flag_start = 0
 flag_menu = 0
 
 
-def draw_screen(i):
-    r_v.rocket_position(tr.position_and_velocity_log[i])
-    s_v.draw_everything(tr.position_and_velocity_log[i])
-    p_v.parameters(tr.position_and_velocity_log[i], i)
+def draw_screen(sec):
+    r_v.rocket_position(s_b.rocket.parameters)
+    s_v.draw_everything(s_b.rocket.parameters)
+    p_v.parameters(s_b.rocket.parameters, sec)
 
     window.blit(r_v.rocket_view, (r_v.w / 2, 0))
     window.blit(s_v.space_view, (0, r_v.h / 2))
@@ -52,13 +52,14 @@ while not finished:
     if flag_menu == 0:
         flag_menu = m_m.main_menu(window, flag_menu)
         if flag_menu == 1:
-            draw_screen(counter)
+            draw_screen(0)
     else:
 
         if (flag_start == 1) and (seconds - flag_seconds >= 0.1):
             flag_seconds = seconds
             counter += 1
-            draw_screen(counter)
+            draw_screen(counter * 5)
+            tr.process_step(s_b.rocket, 5, True, seconds, s_b.constants)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -30,7 +30,7 @@ scale = 5
 def rocket_position(arr):
     x = arr[0]
     y = arr[1]
-    height = (x ** 2 + y ** 2) ** 0.5 - tr.const.rad_Earth
+    height = (x ** 2 + y ** 2) ** 0.5 - sb.constants.rad_Earth
     if int(255 * (1 - height / (3 * 10 ** 5))) > 30:
         SKY[2] = int(255 * (1 - height / (3 * 10 ** 5)))
     else:
