@@ -27,7 +27,7 @@ class Engine(Entity):
         self.output = 100
         self.power_on = 0
         self.type = "engine"
-        self.texture = pygame.image.load('textures/engines/midsize_engine_90x60.png')
+        self.texture = pygame.image.load('Textures/engines/big_engine_120x80.png')
 
 
 class FuelTank(Entity):
@@ -36,14 +36,14 @@ class FuelTank(Entity):
         self.capacity = capacity
         self.fullness = 100
         self.type = "fueltank"
-        self.texture = pygame.image.load('textures/tanks/new/tank_simple_90x60.png')
+        self.texture = pygame.image.load('Textures/tanks/tank_simple_100x50.png')
 
 
 class Cabin(Entity):
     def __init__(self, surface, x=0, y=0, mass=0):
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.type = "cabin"
-        self.texture = pygame.image.load('textures/capsule/capsule_90x60.png')
+        self.texture = pygame.image.load('Textures/capsule/capsule_90x60.png')
 
 
 class Conector(Entity):
