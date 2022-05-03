@@ -9,7 +9,7 @@ class Constants:
     Constants used throughout the script execution
     """
 
-    def __init__(self, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, step):
+    def __init__(self, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity):
         self.height_max = 9000  # высота в метрах, на которой плотность воздуха падает в е раз
         self.rho_max = 1.2  # плотность воздуха на высоте уровня моря
         self.area = 2.  # площадь КА
@@ -26,7 +26,7 @@ class Constants:
         self.fuel_consumption = fuel_consumption  # расход топлива
         self.fuel_tank_capacity = fuel_tank_capacity
 
-        self.step = step
+        self.step = 5
 
 
 class RocketParameters:
@@ -53,9 +53,9 @@ class RocketParameters:
 
 class PhysicsEngine:
 
-    def __init__(self, step, initial_rocket_mass, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, fuel,
+    def __init__(self, initial_rocket_mass, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, fuel,
                  initial_parameters):
-        self.constants = Constants(gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, step)
+        self.constants = Constants(gas_exhaust_speed, fuel_consumption, fuel_tank_capacity)
         self.rocket_parameters = RocketParameters(initial_parameters, initial_rocket_mass, fuel)
 
     def set_predicative_orbit_log_size(self, new_size):
@@ -68,7 +68,7 @@ class PhysicsEngine:
         self.rocket_parameters.direction = new_direction
 
     def reduce_mass(self):
-        if self.rocket_parameters.engine_is_on_flag:
+        if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
             self.rocket_parameters.current_stage_mass -= self.constants.step * self.constants.fuel_consumption
             self.rocket_parameters.fuel_remained -= self.constants.step * self.constants.fuel_consumption
 
@@ -246,8 +246,8 @@ class PhysicsEngine:
 
 
 if __name__ == "__main__":
-    initial_position = [10e6, 0, 0, 3000]
-    engine = PhysicsEngine(5, 80000, 4000, 300, 50000, 50000, initial_position)
+    initial_position = [10e6, 0, 0, 5000]
+    engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
     engine.switch_engine(True)
 
     size = 500000
@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
     engine.set_rocket_direction(np.array([0, 1]))
 
-    while counter < 300:
+    while counter < 1000:
         counter += 1
         engine.process_step()
         position_and_velocity_log[counter] = engine.rocket_parameters.parameters

@@ -33,17 +33,14 @@ class Rocket:
         self.height = self.grid_y * self.block_y
         self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
         self.parts = []
-        ##########
-        self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
-        self.parameters = np.array([0.0, 0, 0, 0])
-        self.direction = np.array([1.0, 0])
-        self.predicative_orbit = np.ndarray(shape=(100, 4), dtype=float)
+
+        self.physics_engine = None
 
     def activate_stage(self):
         """
         перерассчитывает текущие параметры ракеты (ступени)
         """
-        self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
+        self.physics_engine = trajectory_calculation.PhysicsEngine(5, *self.get_active_parameters(), [10e6, 0, 0, 3000])
 
     def activate_all(self):
         """
@@ -200,7 +197,7 @@ rocket.activate_all()
 
 rocket.activate_stage()
 
-rocket.active_stage = trajectory_calculation.Stage([80000, 4000, 300, 50000, 50000])
+rocket.active_stage = trajectory_calculation.MechanicalParameters([80000, 4000, 300, 50000, 50000])
 
 size = 500000
 const = trajectory_calculation.Constants()
@@ -233,7 +230,7 @@ heading = np.array([0, 1])
 heading = heading / np.linalg.norm(heading)
 rocket.direction = heading
 
-rocket.active_stage = trajectory_calculation.Stage([30000, 3000, 200, 28000, 28000])
+rocket.active_stage = trajectory_calculation.MechanicalParameters([30000, 3000, 200, 28000, 28000])
 
 while counter < 1000:
     counter += 1
