@@ -6,38 +6,43 @@ class Entity:
     Просто класс, объект которого будет статично отрисован на ракете
     """
 
-    def __init__(self, surface, x=0, y=0, size=1):
+    def __init__(self, surface, x=0, y=0, size=1, mass=0):
         self.surface = surface
         self.x = x
         self.y = y
         self.size = size
+        self.mass = mass
         self.texture = 0
+        self.active = 0
 
     def draw(self):
         self.surface.blit(self.texture, dest=[self.x, self.y])
 
 
 class Engine(Entity):
-    def __init__(self, surface, power = 0, consumption = 0, x=0, y=0):
-        Entity.__init__(self, surface, x=x, y=y)
+    def __init__(self, surface, power=0, consumption=0, x=0, y=0, mass=0):
+        Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.power = power
         self.consumption = consumption
         self.output = 100
         self.power_on = 0
-        self.texture = pygame.image.load('textures/engines/big_engine_120x80.png')
+        self.type = "engine"
+        self.texture = pygame.image.load('textures/engines/midsize_engine_90x60.png')
 
 
 class FuelTank(Entity):
-    def __init__(self, surface, capacity, x=0, y=0):
-        Entity.__init__(self, surface, x=x, y=y)
+    def __init__(self, surface, capacity = 0, x=0, y=0, mass=0):
+        Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.capacity = capacity
         self.fullness = 100
+        self.type = "fueltank"
         self.texture = pygame.image.load('textures/tanks/new/tank_simple_90x60.png')
 
 
 class Cabin(Entity):
-    def __init__(self, surface, x=0, y=0):
-        Entity.__init__(self, surface, x=x, y=y)
+    def __init__(self, surface, x=0, y=0, mass=0):
+        Entity.__init__(self, surface, x=x, y=y, mass=mass)
+        self.type = "cabin"
         self.texture = pygame.image.load('textures/capsule/capsule_90x60.png')
 
 
@@ -46,8 +51,6 @@ class Conector(Entity):
         Entity.__init__(self, surface)
         self.double = 1
         self.left = 0
-
-
 
 
 '''screen = pygame.display.set_mode((900, 900))
