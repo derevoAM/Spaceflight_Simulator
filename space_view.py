@@ -22,10 +22,10 @@ scale = radius / tr.const.rad_Earth
 def draw_everything(arr):
     space_view.fill((0, 0, 0, 0))
     pygame.draw.circle(space_view, WHITE, (
-        scale * arr[0] + r_v.w / 4, scale * arr[1] + r_v.h / 4),
+        scale * arr[0] + r_v.w / 4, -scale * arr[1] + r_v.h / 4),
                        10)
     pygame.draw.circle(space_view, EARTH, (r_v.w / 4, r_v.h / 4), radius)
     for i in range(tr.counter):
         pygame.draw.rect(space_view, WHITE,
                          (scale * tr.position_and_velocity_log[i][0] + r_v.w / 4,
-                          scale * tr.position_and_velocity_log[i][1] + r_v.h / 4, 1, 1))
+                          -scale * tr.position_and_velocity_log[i][1] + r_v.h / 4, 1, 1))
