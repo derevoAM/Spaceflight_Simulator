@@ -21,6 +21,10 @@ class Rocket:
     """
 
     def __init__(self):
+        """
+        Конструктор ракеты
+        инициализирует поля, являющиеся характеристиками холста ракеты и для подсчёта траектории
+        """
         self.grid_x = 30
         self.grid_y = 20
         self.block_x = 100
@@ -36,13 +40,22 @@ class Rocket:
         self.predicative_orbit = np.ndarray(shape=(100, 4), dtype=float)
 
     def activate_stage(self):
+        """
+        перерассчитывает текущие параметры ракеты (ступени)
+        """
         self.active_stage = trajectory_calculation.Stage(self.get_active_parameters())
 
     def activate_all(self):
+        """
+        Активирует все составляющие ракеты
+        """
         for part in self.parts:
             part.active = True
 
     def get_active_parameters(self):
+        """
+        Функция возвращает параметры ракеты в текущий момент как сумму соответствующих параметров деталей
+        """
         initial_mass = 0
         exhaust_speed = 0
         fuel_consumption = 0
@@ -64,7 +77,8 @@ class Rocket:
     ###################
     def add_part(self, part_entity):
         """
-        В деталях заранее прописаны координаты
+        Добавление детали в ракету
+        part_entity - объкт классаа Entity
         """
         part_entity.surface = self.surface
         self.parts.append(part_entity)
@@ -72,6 +86,7 @@ class Rocket:
 
     def recount(self):
         """
+        Эта функция двигает составляющие ракеты так, чтобы ракета касалась верха окна и левой его стенки
         Вот это надо делать всегда после изменения составляющих ракеты
         После этого слетит сетка, но зато избавимся от копий деталей
         Операция жрёт время (потенциально)
@@ -92,9 +107,15 @@ class Rocket:
             part_entity.draw()
 
     def get_surface(self):
+        """
+        Просто возвращает холст с ракетой
+        """
         return self.surface
 
     def draw_grid(self):
+        """
+        рисует сетку с шагом grid_x по оси х и grid_y по оси y
+        """
         grey = (125, 125, 125)
         for i in range(self.block_x + 1):
             dr.line(self.surface, grey, (i * self.grid_x, 0), (i * self.grid_x, self.height))
@@ -102,6 +123,10 @@ class Rocket:
             dr.line(self.surface, grey, (0, j * self.grid_y), (self.width, j * self.grid_y))
 
     def draw(self, gridded=0):
+        """
+        Просто отрисовывает все составляющие ракеты на её экране
+        gridded отвечает за сетку на экране (ри True - рисует, при false - иначе)
+        """
         if gridded:
             self.draw_grid()
         for part_entity in self.parts:
@@ -109,6 +134,10 @@ class Rocket:
 
 
 def load_rocket(sourcefile):
+    """
+    Читает составляющие ракеты из файла, строит ракету и возвращает готовый объект
+    sourcefile - Путь к файлу, где записана ракета
+    """
     rocket_entity = Rocket()
     with open(sourcefile, "r") as f:
         part_lines = f.readlines()
@@ -128,6 +157,11 @@ def load_rocket(sourcefile):
 
 
 def save_rocket(rocket_entity, outfile):
+    """
+    Сохраняет ракету в файл
+    rocket_entity - объект класса Rocket
+    outfile - путь к файлу сохранения
+    """
     with open(outfile, "w") as file:
         for part_entity in rocket_entity.parts:
             file.write(str(part_entity.type) + " " + str(part_entity.x) + " " + str(part_entity.y) + "\n")
