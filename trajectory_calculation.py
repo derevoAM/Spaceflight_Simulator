@@ -8,7 +8,7 @@ class Constants:
     Constants used throughout the script execution
     """
 
-    def __init__(self):
+    def __init__(self, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, step):
         self.height_max = 9000  # высота в метрах, на которой плотность воздуха падает в е раз
         self.rho_max = 1.2  # плотность воздуха на высоте уровня моря
         self.area = 2.  # площадь КА
@@ -19,265 +19,212 @@ class Constants:
         self.mu_moon = 4.91e12  # гравитационный параметр Луны (гравитационная постоянная * масса)
         self.moon_rad = 3.85e8  # радиус орбиты Луны
         self.moon_period = 27.3 * 24 * 3600 / 2 / np.pi  # период обращения Луны вокруг Земли в с/рад
-        self.fas_0 = 99 / 180 * np.pi  # начальная фаза Луны (которую нужно подогнать)
+        self.initial_fas = 99 / 180 * np.pi  # начальная фаза Луны (которую нужно подогнать)
+
+        self.gas_exhaust_speed = gas_exhaust_speed  # скорость истечения топлива
+        self.fuel_consumption = fuel_consumption  # расход топлива
+        self.fuel_tank_capacity = fuel_tank_capacity
+
+        self.step = step
 
 
-class Stage:
-    """
-    Rocket part class
-    """
+class RocketParameters:
 
-    def __init__(self, active_rocket_parameters):
-        """
-        Class initializer
-        :param active_rocket_parameters:
-        [initial_rocket_mass, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, fuel] array
-        """
-        self.current_stage_mass = active_rocket_parameters[0]  # масса ступени текущая
-        self.gas_exhaust_speed = active_rocket_parameters[1]  # скорость истечения топлива
-        self.fuel_consumption = active_rocket_parameters[2]  # расход топлива
-        self.fuel_tank_capacity = active_rocket_parameters[3]
-        self.fuel = active_rocket_parameters[4]
+    def __init__(self, initial_rocket_mass, fuel):
+        self.parameters = np.array([0.0, 0, 0, 0])
+        self.position_norm = np.linalg.norm(self.parameters[:2])
+        self.velocity_norm = np.linalg.norm(self.parameters[2:])
+        self.direction = np.array([1, 0])
+        self.current_time = 0.0
+        self.predicative_orbit = np.ndarray(shape=(100, 4), dtype=float)
+
+        self.current_stage_mass = initial_rocket_mass  # масса ступени текущая
+        self.fuel_remained = fuel
+
+        self.engine_is_on_flag = False
+
+    def renew_norms(self):
+        self.position_norm = np.linalg.norm(self.parameters[:2])
+        self.velocity_norm = np.linalg.norm(self.parameters[2:])
+
+    def turn_rocket(self):
+        pass
 
     def is_empty(self):
+        return self.fuel_remained <= 0
+
+
+class PhysicsEngine:
+
+    def __init__(self, step, initial_rocket_mass, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, fuel):
+        self.constants = Constants(gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, step)
+        self.rocket_parameters = RocketParameters(initial_rocket_mass, fuel)
+
+    def calc_rho(self, height):
         """
-        Secondary function
-        :return: true if tank is empty, otherwise false
+        Calculating atmosphere rho
+        :param height: height above the sea level
+        :return: rho
         """
-        return self.fuel <= 0
+        return self.constants.rho_max * np.exp(-height / self.constants.height_max)
 
-    def reduce_mass(self, step):
+    def reduce_mass(self):
+        self.rocket_parameters.current_stage_mass -= self.constants.step * self.constants.fuel_consumption
+        self.rocket_parameters.fuel_remained -= self.constants.step * self.constants.fuel_consumption
+
+    def calc_moon_position(self):
         """
-        Secondary function to reduce stage mass
-        :param step: time step
+        Calculating moon position in the particular moment of time
+        :return: array [x, y] of moon coordinates
         """
-        if not self.is_empty():
-            self.fuel -= self.fuel_consumption * step
-            self.current_stage_mass -= self.fuel_consumption * step
+        return self.constants.moon_rad * np.array(
+            [np.cos(self.constants.initial_fas + self.rocket_parameters.current_time / self.constants.moon_period),
+             np.sin(self.constants.initial_fas + self.rocket_parameters.current_time / self.constants.moon_period)])
 
-
-def calc_rho(height, constants):
-    """
-    Calculating atmosphere rho
-    :param height: height above the sea level
-    :param constants: class of constants
-    :return: rho
-    """
-    return constants.rho_max * np.exp(-height / constants.height_max)
-
-
-def calc_moon_position(current_time, constants):
-    """
-    Calculating moon position in the particular moment of time
-    :param current_time: global time
-    :param constants: class of constants
-    :return: array [x, y] of moon coordinates
-    """
-    return constants.moon_rad * np.array(
-        [np.cos(constants.fas_0 + current_time / constants.moon_period),
-         np.sin(constants.fas_0 + current_time / constants.moon_period)])
-
-
-def calc_acceleration_air(stage_parameters, stage, position_norm, velocity_norm, constants):
-    """
-    Calculating air impact
-    :param stage_parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-    :param stage: stage entity
-    :param position_norm: the norm of vector earth-rocket
-    :param velocity_norm: the norm of rocket speed
-    :param constants: class of constants
-    :return: [ax, ay] array consisting of acceleration values for each axis
-    """
-    if position_norm - constants.rad_Earth < 10 * constants.height_max:
-        return - 0.5 * constants.C_coefficient * calc_rho(
-            position_norm - constants.rad_Earth, constants) * constants.area * velocity_norm \
-               * stage_parameters[2:] / stage.current_stage_mass
-    else:
-        return np.zeros(2)
-
-
-def calc_acceleration_earth(stage_parameters, position_norm, constants):
-    """
-    Calculating gravitational acceleration by Earth
-    :param stage_parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-    :param position_norm: the norm of vector earth-rocket
-    :param constants: class of constants
-    :return: [ax, ay] array consisting of acceleration values for each axis
-    """
-    return - constants.mu_Earth / position_norm ** 3 * stage_parameters[:2]
-
-
-def calc_acceleration_engine(stage, velocity_norm, rocket_heading, engine_is_on_flag):
-    """
-    Calculating acceleration by engine working
-    :param stage: stage entity
-    :param velocity_norm: the norm of rocket speed
-    :param rocket_heading: vector of rocket direction
-    :param engine_is_on_flag: true if the engine is working
-    :return: [ax, ay] array consisting of acceleration values for each axis
-    """
-    if engine_is_on_flag and not stage.is_empty():
-        if velocity_norm > 1e-8:
-            return stage.fuel_consumption * stage.gas_exhaust_speed / stage.current_stage_mass \
-                   * rocket_heading
+    def calc_acceleration_air(self):
+        """
+        Calculating air impact
+        :return: [ax, ay] array consisting of acceleration values for each axis
+        """
+        if self.rocket_parameters.position_norm - self.constants.rad_Earth < 10 * self.constants.height_max:
+            return - 0.5 * self.constants.C_coefficient * self.calc_rho(
+                self.rocket_parameters.position_norm - self.constants.rad_Earth) * self.constants.area * \
+                   self.rocket_parameters.velocity_norm * \
+                   self.rocket_parameters.parameters[2:] / self.rocket_parameters.current_stage_mass
         else:
-            return np.array([stage.fuel_consumption * stage.gas_exhaust_speed / stage.current_stage_mass, 0])
-    else:
-        return np.zeros(2)
+            return np.zeros(2)
+
+    def calc_acceleration_earth(self):
+        """
+        Calculating gravitational acceleration by Earth of rocket stage parameters
+        :return: [ax, ay] array consisting of acceleration values for each axis
+        """
+        return - self.constants.mu_Earth / self.rocket_parameters.position_norm ** 3 * self.rocket_parameters.parameters[
+                                                                                       :2]
+
+    def calc_acceleration_engine(self):
+        """
+        Calculating acceleration by engine working
+        :return: [ax, ay] array consisting of acceleration values for each axis
+        """
+        if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
+            if self.rocket_parameters.velocity_norm > 1e-8:
+                return self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass \
+                       * self.rocket_parameters.direction
+            else:
+                return np.array([
+                    self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass,
+                    0])
+        else:
+            return np.zeros(2)
+
+    def calc_acceleration_moon(self):
+        """
+        Calculating gravitational acceleration made by moon
+        :return: [ax, ay] array consisting of acceleration values for each axis
+        """
+        rad_moon_ka = self.rocket_parameters.parameters[:2] - self.calc_moon_position()
+
+        return - self.constants.mu_moon * rad_moon_ka / (np.linalg.norm(rad_moon_ka)) ** 3
+
+    def calc_acceleration(self):
+        """
+        Calculating final value of vehicle acceleration
+        :return: [ax, ay] array consisting of acceleration values for each axis
+        """
+
+        acceleration_air = self.calc_acceleration_air()
+
+        acceleration_gravity = self.calc_acceleration_earth()
+
+        acceleration_engine = self.calc_acceleration_engine()
+
+        acceleration_moon = self.calc_acceleration_moon()
+
+        return acceleration_air + acceleration_gravity + acceleration_engine + acceleration_moon
+
+    def calc_differential(self):
+        """
+        Calculating Runge-Kutta method differential
+        :return: [vx, vy, ax, ay] array
+        """
+        total_acceleration = self.calc_acceleration()
+
+        return np.array(
+            [self.rocket_parameters.parameters[2], self.rocket_parameters.parameters[3], total_acceleration[0],
+             total_acceleration[1]])
+
+    def calc_step(self):
+        """
+        Main function to calculate stage parameters for the next step
+        :return: array [new_x, new_y, new_vx, new_vy] for the next step
+        """
+        k_1 = self.calc_differential()
+        k_2 = self.calc_differential()
+        k_3 = self.calc_differential()
+        k_4 = self.calc_differential()
+
+        self.reduce_mass()
+
+        self.rocket_parameters.parameters += (k_1 + 2 * (k_2 + k_3) + k_4) * self.constants.step / 6
+
+        self.rocket_parameters.current_time += self.constants.step
+
+        self.rocket_parameters.renew_norms()
+
+    def calc_differential_euler(self, predicative_stage_parameters):
+        """
+        Function to calculate differential for predicative orbit parameters
+        :return: predicative [vx, vy, ax, ay] array
+        """
+        total_acceleration = self.calc_acceleration_earth() + self.calc_acceleration_moon()
+
+        return np.array([predicative_stage_parameters[2], predicative_stage_parameters[3],
+                         total_acceleration[0],
+                         total_acceleration[1]])
+
+    def calc_step_euler(self, predicative_stage_parameters, time):
+        """
+        Function to process step using basic integration method
+        :param predicative_stage_parameters: predicative [x, y, vx, vy] array consisting of rocket stage parameters
+        :param time: time used in predicative calculations
+        :return: predicative [new_x, new_y, new_vx, new_vy] array
+        """
+        return predicative_stage_parameters + self.calc_differential_euler(
+            predicative_stage_parameters) * self.constants.step, time + self.constants.step * 5
+
+    def calc_predicative_orbit(self, stage_parameters, time):
+        """
+        Function to calculate predicative orbit
+        :param stage_parameters: current stage parameters use for further orbit predication
+        :param time: time used in predicative calculations
+        :return: array [[x, y, vx, vy], ...] consisting of predicative orbit points
+        """
+        log_size = 100
+        time_array = np.zeros(log_size)
+        time_array[0] = time
+        predicative_orbit = np.ndarray(shape=(log_size, 4), dtype=float)
+        predicative_orbit[0] = stage_parameters
+        count = 0
+
+        while count < log_size - 1:
+            count += 1
+            predicative_orbit[count], time_array[count] = self.calc_step_euler(predicative_orbit[count - 1],
+                                                                               time_array[count - 1])
+
+        self.rocket_parameters.predicative_orbit = predicative_orbit
+
+    def process_step(self):
+        """
+        Function to process step
+        :return: new time
+        """
+        self.calc_step()
+        self.calc_predicative_orbit(self.rocket_parameters.parameters[-1], self.rocket_parameters.current_time)
 
 
-def calc_acceleration_moon(stage_parameters, time, constants):
-    """
-    Calculating gravitational acceleration made by moon
-    :param stage_parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-    :param time: global time
-    :param constants: class of constants
-    :return: [ax, ay] array consisting of acceleration values for each axis
-    """
-    rad_moon_ka = stage_parameters[:2] - calc_moon_position(time, constants)
-
-    return - constants.mu_moon * rad_moon_ka / (np.linalg.norm(rad_moon_ka)) ** 3
-
-
-def calc_acceleration(stage_parameters, stage, rocket_heading, engine_is_on_flag, time, constants):
-    """
-    Calculating final value of vehicle acceleration
-    :param stage_parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-    :param stage: stage entity
-    :param rocket_heading: vector of rocket direction
-    :param engine_is_on_flag: true if the engine is working
-    :param time: global time
-    :param constants: class of constants
-    :return: [ax, ay] array consisting of acceleration values for each axis
-    """
-    position_norm = np.linalg.norm(stage_parameters[:2])
-    velocity_norm = np.linalg.norm(stage_parameters[2:])
-
-    acceleration_air = calc_acceleration_air(stage_parameters, stage, position_norm, velocity_norm, constants)
-
-    acceleration_gravity = calc_acceleration_earth(stage_parameters, position_norm, constants)
-
-    acceleration_engine = calc_acceleration_engine(stage, velocity_norm, rocket_heading,
-                                                   engine_is_on_flag)
-
-    acceleration_moon = calc_acceleration_moon(stage_parameters, time, constants)
-
-    return acceleration_air + acceleration_gravity + acceleration_engine + acceleration_moon
-
-
-def calc_differential(stage_parameters, stage, rocket_heading, engine_is_on_flag, time, constants):
-    """
-    Calculating Runge-Kutta method differential
-    :param stage_parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-    :param stage: stage entity
-    :param rocket_heading: vector of rocket direction
-    :param engine_is_on_flag: true if the engine is working
-    :param time: global time
-    :param constants: class of constants
-    :return: [vx, vy, ax, ay] array
-    """
-    total_acceleration = calc_acceleration(stage_parameters, stage, rocket_heading, engine_is_on_flag, time, constants)
-
-    return np.array([stage_parameters[2], stage_parameters[3], total_acceleration[0], total_acceleration[1]])
-
-
-def calc_step(stage_parameters, step, stage, rocket_heading, engine_is_on_flag, time, constants):
-    """
-    Main function to calculate stage parameters for the next step
-    :param stage_parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-    :param step: time step
-    :param stage: stage entity
-    :param rocket_heading: vector heading
-    :param engine_is_on_flag: true if the engine is working
-    :param time: global time
-    :param constants : class of constants
-    :return: array [new_x, new_y, new_vx, new_vy] for the next step
-    """
-    k_1 = calc_differential(stage_parameters, stage, rocket_heading, engine_is_on_flag, time, constants)
-    k_2 = calc_differential(stage_parameters + 0.5 * step * k_1, stage, rocket_heading, engine_is_on_flag, time,
-                            constants)
-    k_3 = calc_differential(stage_parameters + 0.5 * step * k_2, stage, rocket_heading, engine_is_on_flag, time,
-                            constants)
-    k_4 = calc_differential(stage_parameters + step * k_3, stage, rocket_heading, engine_is_on_flag, time, constants)
-
-    stage.reduce_mass(step)
-
-    return stage_parameters + (k_1 + 2 * (k_2 + k_3) + k_4) * step / 6, time + step
-
-
-################
-
-def calc_differential_euler(predicative_stage_parameters, time, constants):
-    """
-    Function to calculate differential for predicative orbit parameters
-    :param predicative_stage_parameters: predicative [x, y, vx, vy] array consisting of rocket stage parameters
-    :param time: time used in predicative calculations
-    :param constants: class of constants
-    :return: predicative [vx, vy, ax, ay] array
-    """
-    total_acceleration = calc_acceleration_earth(predicative_stage_parameters,
-                                                 np.linalg.norm(predicative_stage_parameters[:2]),
-                                                 constants) + calc_acceleration_moon(predicative_stage_parameters, time,
-                                                                                     constants)
-
-    return np.array([predicative_stage_parameters[2], predicative_stage_parameters[3], total_acceleration[0],
-                     total_acceleration[1]])
-
-
-def calc_step_euler(predicative_stage_parameters, step, time, constants):
-    """
-    Function to process step using basic integration method
-    :param predicative_stage_parameters: predicative [x, y, vx, vy] array consisting of rocket stage parameters
-    :param step: step used for forecast
-    :param time: time used in predicative calculations
-    :param constants: class of constants
-    :return: predicative [new_x, new_y, new_vx, new_vy] array
-    """
-    return predicative_stage_parameters + calc_differential_euler(predicative_stage_parameters, time,
-                                                                  constants) * step, time + step
-
-
-def calc_predicative_orbit(stage_parameters, step, time, constants):
-    """
-    Function to calculate predicative orbit
-    :param stage_parameters: current stage parameters use for further orbit predication
-    :param step: step used for forecast
-    :param time: time used in predicative calculations
-    :param constants: class of constants
-    :return: array [[x, y, vx, vy], ...] consisting of predicative orbit points
-    """
-    log_size = 100
-    time_array = np.zeros(log_size)
-    time_array[0] = time
-    predicative_orbit = np.ndarray(shape=(log_size, 4), dtype=float)
-    predicative_orbit[0] = stage_parameters
-    count = 0
-
-    while count < log_size - 1:
-        count += 1
-        predicative_orbit[count], time_array[count] = calc_step_euler(predicative_orbit[count - 1], step,
-                                                                      time_array[count - 1], constants)
-
-    return predicative_orbit
-
-
-def process_step(rocket, step, engine_is_on_flag, current_time, constants):
-    """
-    Function to process step
-    :param rocket: rocket entity
-    :param step: time step
-    :param engine_is_on_flag: true if engine is working
-    :param current_time: global time
-    :param constants: class of constants
-    :return: new time
-    """
-    rocket.parameters, new_time = calc_step(rocket.parameters, step, rocket.active_stage, rocket.direction,
-                                            engine_is_on_flag,
-                                            current_time, constants)
-    rocket.predicative_orbit = calc_predicative_orbit(rocket.parameters, 5 * step, current_time, constants)
-
-    return new_time
-
+if __name__ == "__main__":
+    engine = PhysicsEngine()
 
 """size = 500000
 const = Constants()
