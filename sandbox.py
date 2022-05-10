@@ -40,7 +40,7 @@ class Rocket:
         """
         перерассчитывает текущие параметры ракеты (ступени)
         """
-        self.physics_engine = trajectory_calculation.PhysicsEngine(5, *self.get_active_parameters(), [10e6, 0, 0, 3000])
+        self.physics_engine = trajectory_calculation.PhysicsEngine(5, *self.get_active_parameters())
 
     def activate_all(self):
         """
