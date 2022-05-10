@@ -33,8 +33,6 @@ class RocketParameters:
 
     def __init__(self, initial_parameters, initial_rocket_mass, fuel):
         self.parameters = np.array(initial_parameters)
-        self.position_norm = np.linalg.norm(self.parameters[:2])
-        self.velocity_norm = np.linalg.norm(self.parameters[2:])
         self.direction = np.array([1, 0])
         self.current_time = 0.0
         self.predicative_orbit = np.ndarray(shape=(100, 4), dtype=float)
@@ -43,6 +41,7 @@ class RocketParameters:
         self.fuel_remained = fuel
 
         self.engine_is_on_flag = True
+        self.collision_flag = False
 
     def turn_rocket(self):
         pass
@@ -74,6 +73,10 @@ class PhysicsEngine:
 
     def switch_engine(self, flag):
         self.rocket_parameters.engine_is_on_flag = flag
+
+    def detect_collision(self):
+        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < engine.constants.rad_Earth:
+            engine.rocket_parameters.collision_flag = True
 
     def calc_rho(self, position_norm):
         """
@@ -243,12 +246,13 @@ class PhysicsEngine:
         """
         self.calc_step()
         self.calc_predicative_orbit()
+        self.detect_collision()
 
 
 if __name__ == "__main__":
-    initial_position = [10e6, 0, 0, 5000]
+    initial_position = [7e6, 0, 0, 8000]
     engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
-    engine.switch_engine(True)
+    engine.switch_engine(False)
 
     size = 500000
 
@@ -261,14 +265,13 @@ if __name__ == "__main__":
 
     engine.set_rocket_direction(np.array([0, 1]))
 
-    while counter < 1000:
+    while counter < 1000 and not engine.rocket_parameters.collision_flag:
         counter += 1
         engine.process_step()
         position_and_velocity_log[counter] = engine.rocket_parameters.parameters
         # print(engine.rocket_parameters.parameters)
         predicative_orbit_log = engine.rocket_parameters.predicative_orbit
 
-    print(engine.rocket_parameters.current_stage_mass)
     fig, ax = plt.subplots()
     plt.axis('equal')
     ax.add_patch(plt.Circle((0, 0), engine.constants.rad_Earth))
