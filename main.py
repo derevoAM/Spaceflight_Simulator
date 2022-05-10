@@ -1,19 +1,41 @@
-import trajectory_calculation as tr
-# import draw as dr
-import rocket_view as r_v
-import space_view as s_v
-import parameters_view as p_v
-import sandbox as s_b
-import main_menu as m_m
+# import trajectory_calculation as tr
+# import rocket_view
+# import space_view
+# import parameters_view
+import sandbox_menu
+import sandbox
+import parts
+import main_menu
+import draw_screen
 
 import pygame
+
+import trajectory_calculation
 
 pygame.init()
 FPS = 20
 
-window = r_v.window
+window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-print(r_v.w, r_v.h)
+window_width, window_height = pygame.display.get_surface().get_size()
+
+rocket = sandbox.Rocket()
+engine = parts.Engine(rocket.surface, x=200, y=300)
+fuel_tank = parts.FuelTank(rocket.surface, x=100, y=100)
+rocket.add_part(engine)
+rocket.add_part(fuel_tank)
+
+rocket_parameters = trajectory_calculation.PhysicsEngine(80000, 4000, 300, 50000, 50000)
+constants = rocket_parameters.constants
+rocket_parameters.rocket_parameters.parameters = [constants.rad_Earth, 0, 0, 0]
+
+Rocket_surface = draw_screen.RocketView(window_width, window_height, rocket)
+Space_surface = draw_screen.SpaceView(window_width, window_height, rocket)
+Parameters_surface = draw_screen.ParametersView(window_width, window_height, rocket)
+
+Views = [Rocket_surface, Space_surface, Parameters_surface]
+
+print(Rocket_surface.width, Rocket_surface.height)
 
 clock = pygame.time.Clock()
 finished = False
@@ -25,50 +47,42 @@ start_ticks = pygame.time.get_ticks()
 counter = 0
 flag_seconds = 0
 flag_start = 0
-flag_menu = 0
 
 
-def draw_screen(sec):
-    r_v.rocket_position(s_b.rocket.parameters)
-    s_v.draw_everything(s_b.rocket.parameters)
-    p_v.parameters(s_b.rocket.parameters, sec)
-
-    window.blit(r_v.rocket_view, (r_v.w / 2, 0))
-    window.blit(s_v.space_view, (0, r_v.h / 2))
-    window.blit(p_v.parameters_view, (0, 0))
+def draw_everything():
+    for view in Views:
+        view.draw()
+        window.blit(view.surface, (view.x, view.y))
 
 
-
-
-
+flag_menu = "main menu"
 
 while not finished:
 
     clock.tick(FPS)
     seconds = (pygame.time.get_ticks() - start_ticks) / 1000
 
-    #events = pygame.event.get()
+    # events = pygame.event.get()
 
-    if flag_menu == 0:
-        flag_menu = m_m.main_menu(window, flag_menu)
-        if flag_menu == 1:
-            draw_screen(0)
+    if flag_menu == "main menu":
+        flag_menu = main_menu.main_menu(window, flag_menu)
+    elif flag_menu == "sandbox menu":
+        flag_menu = sandbox_menu.sandbox(window, flag_menu, window_width, window_height)
     else:
-
-        if (flag_start == 1) and (seconds - flag_seconds >= 0.1):
+        if (flag_start == "play_menu") and (seconds - flag_seconds >= 0.1):
             flag_seconds = seconds
             counter += 1
-            draw_screen(counter * 5)
-            tr.process_step(s_b.rocket, 5, True, seconds, s_b.constants)
+            rocket_parameters.process_step()
+            draw_everything()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            finished = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
                 finished = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    finished = True
-                if event.key == pygame.K_SPACE:
-                    flag_start = 1
+            if event.key == pygame.K_SPACE:
+                flag_start = 1
     pygame.display.update()
 
 pygame.quit()

@@ -187,61 +187,62 @@ pygame.quit()'''
 
 ## Тестирую на совместимость!
 
-constants = trajectory_calculation.Constants()
+if __name__ == "__main__":
+    constants = trajectory_calculation.Constants()
 
-rocket = load_rocket("rockets/test.txt")
+    rocket = load_rocket("rockets/test.txt")
 
-rocket.parameters = np.array([constants.rad_Earth, 0, 0, 0])
+    rocket.parameters = np.array([constants.rad_Earth, 0, 0, 0])
 
-rocket.activate_all()
+    rocket.activate_all()
 
-rocket.activate_stage()
+    rocket.activate_stage()
 
-rocket.active_stage = trajectory_calculation.MechanicalParameters([80000, 4000, 300, 50000, 50000])
+    rocket.active_stage = trajectory_calculation.MechanicalParameters([80000, 4000, 300, 50000, 50000])
 
-size = 500000
-const = trajectory_calculation.Constants()
+    size = 500000
+    const = trajectory_calculation.Constants()
 
-position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
+    position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
 
-predicative_orbit_log = np.ndarray(shape=(500, 4), dtype=float)
-position_and_velocity_log[0] = np.array([const.rad_Earth, 0, 0, 0])  # основной массив (x, y, Vx, Vy)
-time_log = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
-step_time = 5  # шаг расчета
-counter = 0  # счетчик
+    predicative_orbit_log = np.ndarray(shape=(500, 4), dtype=float)
+    position_and_velocity_log[0] = np.array([const.rad_Earth, 0, 0, 0])  # основной массив (x, y, Vx, Vy)
+    time_log = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
+    step_time = 5  # шаг расчета
+    counter = 0  # счетчик
 
-engine_is_on = True
-heading = np.array([8, 2])
-heading = heading / np.linalg.norm(heading)
-rocket.direction = heading
+    engine_is_on = True
+    heading = np.array([8, 2])
+    heading = heading / np.linalg.norm(heading)
+    rocket.direction = heading
 
-while position_and_velocity_log[counter][2] >= 0:
-    counter += 1
-    """position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
-        position_and_velocity_log[counter - 1], step_time,
-        rocket.active_stage,
-        heading, engine_is_on, time_log[counter - 1],
-        const)"""
-    position_and_velocity_log[counter] = rocket.parameters
-    trajectory_calculation.process_step(rocket, step_time, engine_is_on, time_log[counter], constants)
-    predicative_orbit_log = rocket.predicative_orbit
+    while position_and_velocity_log[counter][2] >= 0:
+        counter += 1
+        """position_and_velocity_log[counter], time_log[counter] = trajectory_calculation.calc_step(
+            position_and_velocity_log[counter - 1], step_time,
+            rocket.active_stage,
+            heading, engine_is_on, time_log[counter - 1],
+            const)"""
+        position_and_velocity_log[counter] = rocket.parameters
+        trajectory_calculation.process_step(rocket, step_time, engine_is_on, time_log[counter], constants)
+        predicative_orbit_log = rocket.predicative_orbit
 
-heading = np.array([0, 1])
-heading = heading / np.linalg.norm(heading)
-rocket.direction = heading
+    heading = np.array([0, 1])
+    heading = heading / np.linalg.norm(heading)
+    rocket.direction = heading
 
-rocket.active_stage = trajectory_calculation.MechanicalParameters([30000, 3000, 200, 28000, 28000])
+    rocket.active_stage = trajectory_calculation.MechanicalParameters([30000, 3000, 200, 28000, 28000])
 
-while counter < 1000:
-    counter += 1
-    position_and_velocity_log[counter] = rocket.parameters
-    trajectory_calculation.process_step(rocket, step_time, engine_is_on, time_log[counter], constants)
-    predicative_orbit_log = rocket.predicative_orbit
+    while counter < 1000:
+        counter += 1
+        position_and_velocity_log[counter] = rocket.parameters
+        trajectory_calculation.process_step(rocket, step_time, engine_is_on, time_log[counter], constants)
+        predicative_orbit_log = rocket.predicative_orbit
 
-fig, ax = plt.subplots()
-plt.axis('equal')
-ax.add_patch(plt.Circle((0, 0), const.rad_Earth))
-ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=4)
-ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
+    fig, ax = plt.subplots()
+    plt.axis('equal')
+    ax.add_patch(plt.Circle((0, 0), const.rad_Earth))
+    ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=4)
+    ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
 
-plt.show()
+    plt.show()

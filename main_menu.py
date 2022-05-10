@@ -136,7 +136,7 @@ def main_menu(SCREEN, flag):
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                flag = 1
+                flag = "sandbox menu"
                 SCREEN.fill((0, 0, 0, 0))
             if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                 pygame.quit()
