@@ -20,14 +20,17 @@ window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 window_width, window_height = pygame.display.get_surface().get_size()
 
 rocket = sandbox.Rocket()
-engine = parts.Engine(rocket.surface, x=200, y=300)
-fuel_tank = parts.FuelTank(rocket.surface, x=100, y=100)
-rocket.add_part(engine)
-rocket.add_part(fuel_tank)
+# engine = parts.Engine(rocket.surface, x=200, y=300)
+# fuel_tank = parts.FuelTank(rocket.surface, x=100, y=100)
+# rocket.add_part(engine)
+# rocket.add_part(fuel_tank)
 
-rocket_parameters = trajectory_calculation.PhysicsEngine(80000, 4000, 300, 50000, 50000)
+initial_position = [7e6, 0, 0, 8000]
+rocket_parameters = trajectory_calculation.PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
 constants = rocket_parameters.constants
 rocket_parameters.rocket_parameters.parameters = [constants.rad_Earth, 0, 0, 0]
+
+#rocket_parameters.rocket_parameters.predicative_orbit
 
 Rocket_surface = draw_screen.RocketView(window_width, window_height, rocket)
 Space_surface = draw_screen.SpaceView(window_width, window_height, rocket)
@@ -57,6 +60,7 @@ def draw_everything():
 
 flag_menu = "main menu"
 
+rocket_parts = []
 while not finished:
 
     clock.tick(FPS)
@@ -67,7 +71,10 @@ while not finished:
     if flag_menu == "main menu":
         flag_menu = main_menu.main_menu(window, flag_menu)
     elif flag_menu == "sandbox menu":
-        flag_menu = sandbox_menu.sandbox(window, flag_menu, window_width, window_height)
+        flag_menu, rocket = sandbox_menu.sandbox(window, flag_menu, window_width, window_height, rocket)
+        if flag_menu == "play_menu":
+            for i in rocket_parts:
+                print()
     else:
         if (flag_start == "play_menu") and (seconds - flag_seconds >= 0.1):
             flag_seconds = seconds
