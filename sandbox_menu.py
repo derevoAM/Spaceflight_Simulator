@@ -1,14 +1,25 @@
 import pygame
 import sys
 import parts
+# import random
 
-BG = pygame.image.load("Textures/menu/background.png")
+BG = pygame.image.load("Textures/sandbox_menu/sandbox_back.png")
+
+# pygame.mixer.init()
+# playlist = [
+#     "Textures/music/Trava_u_doma.mp3",
+#     "Textures/music/Star_finder.mp3",
+#     "Textures/music/Fly_Me_To_The_Moon.mp3",
+#     "Textures/music/Counting_Stars.mp3",
+#     "Textures/music/Boyfriend.mp3"
+# ]
 
 
 class Button:
     """
     Class of buttons(texts and images)
     """
+
     def __init__(self, image, pos):
         self.image = image
         self.x_pos = pos[0]
@@ -196,6 +207,7 @@ def upload_parts(arr):
         part.blit()
         part.update()
 
+
 def upload_text(arr, mouse_pos, screen):
     """
     Placing all texts buttons on to the screene
@@ -208,8 +220,13 @@ def upload_text(arr, mouse_pos, screen):
         part.change_color(mouse_pos)
         part.update(screen)
 
+
 def sandbox(SCREEN, flag, width, height, rocket):
     SCREEN.blit(BG, (0, 0))
+
+    # if pygame.mixer.music.get_busy() is False:
+    #     pygame.mixer.music.load(playlist[random.randint(0, 4)])
+    #     pygame.mixer.music.play(loops=0)
 
     menu_mouse_pos = pygame.mouse.get_pos()
 
@@ -223,8 +240,9 @@ def sandbox(SCREEN, flag, width, height, rocket):
 
     play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 100), text_input="PLAY")
-    restart_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
-                             pos=(width - 100, height - 150), text_input="RESTART")
+    restart_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+        pos=(width - 100, height - 150), text_input="RESTART")
     back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 50), text_input="BACK")
 
