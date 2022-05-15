@@ -15,6 +15,7 @@ class Constants:
         self.area = 2.  # площадь КА
         self.C_coefficient = 0.4  # коэффициент аэродинамического сопротивления
         self.rad_Earth = 6.37e6  # радиус Земли (средний)
+        self.rad_Moon = 1.74e6
         self.mu_Earth = 4e14  # гравитационный параметр Земли
         self.mu_moon = 4.91e12  # гравитационный параметр Луны (гравитационная постоянная * масса)
         self.moon_rad = 3.85e8  # радиус орбиты Луны
@@ -39,12 +40,10 @@ class RocketParameters:
 
         self.current_stage_mass = initial_rocket_mass  # масса ступени текущая
         self.fuel_remained = fuel
+        self.engine_power = 1.0
 
         self.engine_is_on_flag = True
         self.collision_flag = False
-
-    def turn_rocket(self):
-        pass
 
     def is_empty(self):
         return self.fuel_remained <= 0
@@ -63,19 +62,36 @@ class PhysicsEngine:
     def set_parameters(self, new_parameters):
         self.rocket_parameters.parameters = new_parameters
 
-    def set_rocket_direction(self, new_direction):
-        self.rocket_parameters.direction = new_direction
+    def set_rocket_direction(self, angle):
+        self.rocket_parameters.direction = np.array([np.cos(angle), np.sin(angle)])
+
+    def turn_rocket(self, angle):
+        """
+        Changing rocket angle
+        :param angle: angle of rotation in radians, can be either positive or negative (positive angle refers to turning
+        rocket
+        counterclockwise)
+        """
+        rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        self.rocket_parameters.direction = np.dot(rotation_matrix, self.rocket_parameters.direction)
 
     def reduce_mass(self):
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
-            self.rocket_parameters.current_stage_mass -= self.constants.step * self.constants.fuel_consumption
-            self.rocket_parameters.fuel_remained -= self.constants.step * self.constants.fuel_consumption
+            self.rocket_parameters.current_stage_mass -= self.rocket_parameters.engine_power * self.constants.step * \
+                                                         self.constants.fuel_consumption
+            self.rocket_parameters.fuel_remained -= self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
 
-    def switch_engine(self, flag):
+    def switch_engine(self, flag, power=1.0):
         self.rocket_parameters.engine_is_on_flag = flag
+        self.rocket_parameters.engine_power = power
 
     def detect_collision(self):
-        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < engine.constants.rad_Earth:
+        """
+        Function to detect collision with Earth and Moon
+        """
+        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < engine.constants.rad_Earth or np.linalg.norm(
+                self.rocket_parameters.parameters[:2] - self.calc_moon_position(
+                    self.rocket_parameters.current_time)) < self.constants.rad_Moon:
             engine.rocket_parameters.collision_flag = True
 
     def calc_rho(self, position_norm):
@@ -129,12 +145,12 @@ class PhysicsEngine:
         """
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
             if velocity_norm > 1e-8:
-                return self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass \
+                return self.rocket_parameters.engine_power * self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass \
                        * self.rocket_parameters.direction
             else:
-                return np.array([
-                    self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass,
-                    0])
+                return np.array([self.rocket_parameters.parameters *
+                                 self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass,
+                                 0])
         else:
             return np.zeros(2)
 
@@ -252,7 +268,7 @@ class PhysicsEngine:
 if __name__ == "__main__":
     initial_position = [7e6, 0, 0, 8000]
     engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
-    engine.switch_engine(False)
+    engine.switch_engine(True, 0.2)
 
     size = 500000
 
@@ -263,7 +279,7 @@ if __name__ == "__main__":
     step_time = 5  # шаг расчета
     counter = 0  # счетчик
 
-    engine.set_rocket_direction(np.array([0, 1]))
+    engine.set_rocket_direction(np.pi/2)
 
     while counter < 1000 and not engine.rocket_parameters.collision_flag:
         counter += 1
