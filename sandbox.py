@@ -1,16 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pygame
-
-# import textures as t
 import parts as p
-# объявили экран, на котором будем рисовать
-# rocket_image = pygame.Surface([ROCKETWINDOWWIDTH, ROCKETWINDOWHEIGHT], pygame.SRCALPHA)
 import trajectory_calculation
 
 
 # Этот файл просто возвращает холст с нарисованной ракетой
-
 
 class Rocket:
     """
@@ -79,9 +74,9 @@ class Rocket:
     def recount(self):
         """
         Эта функция двигает составляющие ракеты так, чтобы ракета касалась верха окна и левой его стенки
+        выстраивает все части ракеты в правильном порядке: сверху вниз:
+        капсула, баки и двигатель
         Вот это надо делать всегда после изменения составляющих ракеты
-        После этого слетит сетка, но зато избавимся от копий деталей
-        Операция жрёт время (потенциально)
         """
         fuel_tanks_y = [0]
         cabin_height = 0
@@ -111,7 +106,6 @@ class Rocket:
     def draw(self):
         """
         Просто отрисовывает все составляющие ракеты на её экране
-        gridded отвечает за сетку на экране (ри True - рисует, при false - иначе)
         """
         for part_entity in self.parts:
             part_entity.draw()
@@ -172,9 +166,9 @@ if __name__ == "__main__":
     capsule = p.Cabin(0)
     capsule.texture = pygame.image.load("textures/capsule/capsule_60x40.png")
     r.add_part(capsule)
-    screen.blit(r.surface, dest = [400, 0])
+    screen.blit(r.surface, dest=[400, 0])
     r.recount()
-    screen.blit(r.surface, dest = [0,0])
+    screen.blit(r.surface, dest=[0, 0])
 
     pygame.display.update()
     clock = pygame.time.Clock()

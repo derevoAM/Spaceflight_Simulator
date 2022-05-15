@@ -84,22 +84,10 @@ class Cabin(Entity):
         self.type = "cabin"
 
 
-class Conector(Entity):
-    """
-    заготовка для будущей реализации класса соединителя
-    """
-
-    def __init__(self, surface):
-        Entity.__init__(self, surface)
-        self.double = 1
-        self.left = 0
-
-
-
 if __name__ == "__main__":
     # Код для первичной проверки работы
     screen = pygame.display.set_mode((900, 900))
-    rocket_image = pygame.Surface([400,500], pygame.SRCALPHA)
+    rocket_image = pygame.Surface([400, 500], pygame.SRCALPHA)
     engine = Engine(screen, x=200, y=100)
     engine.texture = pygame.image.load("textures/engines/big_engine_100x75.png")
     engine.draw()
