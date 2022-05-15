@@ -30,7 +30,7 @@ class Button:
 
     def update(self, screen):
         """
-        Drawing object on scren
+        Drawing object on screen
         :param screen: screen itself
         :return:
         """
@@ -212,7 +212,7 @@ def upload_parts(arr):
 
 def upload_text(arr, mouse_pos, screen):
     """
-    Placing all texts buttons on to the screene
+    Placing all texts buttons on to the screen
     :param arr: array of text buttons
     :param mouse_pos: mouse position
     :param screen: screen
@@ -244,16 +244,13 @@ def sandbox(SCREEN, flag, width, height, rocket, events):
     back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 50), text_input="BACK")
     play_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (40, 40)),
-        pos=(width - 100, 50), text_input="|>")
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
+        pos=(width - 225, 50), text_input="Play Random Song")
     pause_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (40, 40)),
-        pos=(width - 100, 100), text_input="||")
-    unpause_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (40, 40)),
-        pos=(width - 100, 150), text_input="||>")
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
+        pos=(width - 225, 100), text_input="Pause/Continue")
 
-    text_array = [play_button, restart_button, back_button, play_music_button, pause_music_button, unpause_music_button]
+    text_array = [play_button, restart_button, back_button, play_music_button, pause_music_button]
 
     upload_text(text_array, menu_mouse_pos, SCREEN)
 
@@ -281,9 +278,11 @@ def sandbox(SCREEN, flag, width, height, rocket, events):
                     pygame.mixer.music.load(playlist[random.randint(0, 6)])
                     pygame.mixer.music.play(loops=0)
             if pause_music_button.check_for_input(menu_mouse_pos):
-                pygame.mixer.music.pause()
-            if unpause_music_button.check_for_input(menu_mouse_pos):
-                pygame.mixer.music.unpause()
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
+
 
 
     rocket.recount()
