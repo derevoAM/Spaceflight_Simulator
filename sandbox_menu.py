@@ -223,7 +223,7 @@ def upload_text(arr, mouse_pos, screen):
         part.update(screen)
 
 
-def sandbox(SCREEN, flag, width, height, rocket):
+def sandbox(SCREEN, flag, width, height, rocket, events):
     SCREEN.blit(BG, (0, 0))
 
     menu_mouse_pos = pygame.mouse.get_pos()
@@ -257,14 +257,8 @@ def sandbox(SCREEN, flag, width, height, rocket):
 
     upload_text(text_array, menu_mouse_pos, SCREEN)
 
-    # capsule1.update(SCREEN)
-    # fuel1.update(SCREEN)
 
-    # for button in [play_button, OPTIONS_BUTTON, QUIT_BUTTON]:
-    #     button.changeColor(menu_mouse_pos)
-    #     button.update(SCREEN)
-
-    for event in pygame.event.get():
+    for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
@@ -291,9 +285,7 @@ def sandbox(SCREEN, flag, width, height, rocket):
             if unpause_music_button.check_for_input(menu_mouse_pos):
                 pygame.mixer.music.unpause()
 
-            # if QUIT_BUTTON.checkForInput(menu_mouse_pos):
-            #     pygame.quit()
-            #     sys.exit()
+
     rocket.recount()
     rocket.draw()
     SCREEN.blit(rocket.surface, (width / 2, 200))
