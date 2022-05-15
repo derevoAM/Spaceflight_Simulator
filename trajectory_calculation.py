@@ -120,13 +120,14 @@ class PhysicsEngine:
         :param velocity_norm: the norm of rocket speed
         :return: [ax, ay] array consisting of acceleration values for each axis
         """
+        return np.zeros(2)
 
-        if position_norm - self.constants.rad_Earth < 10 * self.constants.height_max:
-            return - 0.5 * self.constants.C_coefficient * self.calc_rho(
-                position_norm - self.constants.rad_Earth) * self.constants.area * velocity_norm \
-                   * parameters[2:] / self.rocket_parameters.current_stage_mass
-        else:
-            return np.zeros(2)
+    """ if position_norm - self.constants.rad_Earth < 10 * self.constants.height_max:
+         return - 0.5 * self.constants.C_coefficient * self.calc_rho(
+             position_norm - self.constants.rad_Earth) * self.constants.area * velocity_norm \
+                * parameters[2:] / self.rocket_parameters.current_stage_mass
+     else:
+         return np.zeros(2)"""
 
     def calc_acceleration_earth(self, parameters, position_norm):
         """
@@ -144,13 +145,9 @@ class PhysicsEngine:
         :return: [ax, ay] array consisting of acceleration values for each axis
         """
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
-            if velocity_norm > 1e-8:
-                return self.rocket_parameters.engine_power * self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass \
-                       * self.rocket_parameters.direction
-            else:
-                return np.array([self.rocket_parameters.parameters *
-                                 self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass,
-                                 0])
+            return self.rocket_parameters.engine_power * self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass \
+                   * self.rocket_parameters.direction
+
         else:
             return np.zeros(2)
 
@@ -266,9 +263,9 @@ class PhysicsEngine:
 
 
 if __name__ == "__main__":
-    initial_position = [7e6, 0, 0, 8000]
+    initial_position = [6.4e6, 0, 0, 0]
     engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
-    engine.switch_engine(True, 0.2)
+    engine.switch_engine(True, 100)
 
     size = 500000
 
@@ -279,20 +276,20 @@ if __name__ == "__main__":
     step_time = 5  # шаг расчета
     counter = 0  # счетчик
 
-    engine.set_rocket_direction(np.pi/2)
+    engine.set_rocket_direction(np.pi / 3)
 
     while counter < 1000 and not engine.rocket_parameters.collision_flag:
         counter += 1
         engine.process_step()
         position_and_velocity_log[counter] = engine.rocket_parameters.parameters
-        # print(engine.rocket_parameters.parameters)
+        print(engine.rocket_parameters.parameters)
         predicative_orbit_log = engine.rocket_parameters.predicative_orbit
 
     fig, ax = plt.subplots()
     plt.axis('equal')
     ax.add_patch(plt.Circle((0, 0), engine.constants.rad_Earth))
     ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=1)
-    ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
+    #ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
 
     plt.show()
 
