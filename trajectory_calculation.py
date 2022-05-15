@@ -263,7 +263,7 @@ class PhysicsEngine:
 
 
 if __name__ == "__main__":
-    initial_position = [6.4e6, 0, 0, 0]
+    initial_position = [6.37e6, 0, 0, 0]
     engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
     engine.switch_engine(True, 100)
 

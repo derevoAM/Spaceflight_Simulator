@@ -23,7 +23,7 @@ class Entity:
         self.size = size
         self.mass = mass
         self.texture = None
-        self.active = 0
+        self.active = 1
 
     def draw(self):
         """
@@ -48,7 +48,7 @@ class Engine(Entity):
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.power = power
         self.consumption = consumption
-        self.output = 100
+        self.output = 1
         self.power_on = 0
         self.type = "engine"
 
@@ -67,7 +67,7 @@ class FuelTank(Entity):
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.capacity = capacity
-        self.fullness = 100
+        self.fullness = 1
         self.type = "fueltank"
 
 

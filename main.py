@@ -83,14 +83,13 @@ def play_menu(obj, param, engine, const):
     :return: obj, engine, const
     """
     if param is None:
-        param = [0, 0, 0, 0]
+        param = [6.37e6, 0, 0, 0]
         initial_parameters = obj.get_active_parameters()
-        engine = trajectory_calculation.PhysicsEngine(initial_parameters[0], initial_parameters[1],
-                                                                     initial_parameters[2], initial_parameters[3],
-                                                                     initial_parameters[4], param)
+        #print(initial_parameters)
+        engine = trajectory_calculation.PhysicsEngine(*initial_parameters, param)
         const = engine.constants
-        engine.rocket_parameters.parameters = [const.rad_Earth, 0, 0, 0]
-        engine.set_rocket_direction([1, 0])
+        engine.switch_engine(True, 100)
+        engine.set_rocket_direction(0)
 
     return obj, engine, const
 

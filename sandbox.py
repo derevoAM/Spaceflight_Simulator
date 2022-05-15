@@ -59,7 +59,7 @@ class Rocket:
                 exhaust_speed = part.output * part.power
                 fuel_consumption = part.output * part.consumption
 
-        return initial_mass, exhaust_speed, fuel_consumption, capacity, fuel
+        return [initial_mass, exhaust_speed, fuel_consumption, capacity, fuel]
 
     ###################
     def add_part(self, part_entity):
