@@ -1,3 +1,59 @@
 cabin 0 0
 fueltank 0 90
 engine 0 180
+
+    def set_predicative_orbit_log_size(self, new_size):
+        """
+        Changing size of predicative orbit array
+        :param new_size:
+        """
+        self.constants.log_size = new_size
+
+    def set_parameters(self, new_parameters):
+        """
+        Changing rocket_parameters
+        :param new_parameters: new rocket parameters
+        """
+        self.rocket_parameters.parameters = new_parameters
+
+    def set_rocket_direction(self, new_angle):
+        """
+        Setting rocket direction
+        :param new_angle: new rocket angle (Ox axis is zero angle, angle increases counterclockwise)
+        """
+        self.rocket_parameters.direction = np.array(
+            [[np.cos(new_angle), -np.sin(new_angle)], [np.sin(new_angle), np.cos(new_angle)]])
+
+    def turn_rocket(self, angle):
+        """
+        Changing rocket angle
+        :param angle: angle of rotation, can be either positive or negative (positive angle refers to turning rocket
+        counterclockwise)
+        """
+        rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        self.rocket_parameters.direction = np.dot(rotation_matrix, self.rocket_parameters.direction)
+
+    def reduce_mass(self):
+        """
+        Reducing fuel level and rocket mass on each step.
+        """
+        if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
+            self.rocket_parameters.current_stage_mass -= self.constants.step * self.constants.max_fuel_consumption * \
+                                                         self.rocket_parameters.engine_power
+            self.rocket_parameters.fuel_remained -= self.constants.step * self.constants.max_fuel_consumption * self.rocket_parameters.engine_power
+
+    def switch_engine(self, flag, power=1.0):
+        """
+        Setting engine power
+        :param flag: true if engine is working, otherwise false
+        :param power: engine power (max is 1, min is 0)
+        """
+        self.rocket_parameters.engine_is_on_flag = flag
+        self.rocket_parameters.engine_power = power
+
+    def detect_collision(self):
+        """
+        Function to detect collision with Earth and Moon
+        """
+        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < self.constants.rad_Earth:
+            self.rocket_parameters.collision_flag = True

@@ -89,7 +89,7 @@ class PhysicsEngine:
         """
         Function to detect collision with Earth and Moon
         """
-        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < engine.constants.rad_Earth or np.linalg.norm(
+        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < self.constants.rad_Earth or np.linalg.norm(
                 self.rocket_parameters.parameters[:2] - self.calc_moon_position(
                     self.rocket_parameters.current_time)) < self.constants.rad_Moon:
             engine.rocket_parameters.collision_flag = True
