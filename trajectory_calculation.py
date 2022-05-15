@@ -92,7 +92,7 @@ class PhysicsEngine:
         if np.linalg.norm(self.rocket_parameters.parameters[:2]) < self.constants.rad_Earth or np.linalg.norm(
                 self.rocket_parameters.parameters[:2] - self.calc_moon_position(
                     self.rocket_parameters.current_time)) < self.constants.rad_Moon:
-            engine.rocket_parameters.collision_flag = True
+            self.rocket_parameters.collision_flag = True
 
     def calc_rho(self, position_norm):
         """
