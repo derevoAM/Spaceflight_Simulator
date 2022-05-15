@@ -50,7 +50,7 @@ def draw_everything():
     :return:
     """
     for view in Views:
-        view.draw(rocket_engine.rocket_parameters.parameters, constants)
+        view.draw(rocket_engine)
         window.blit(view.surface, (view.x, view.y))
 
 
@@ -73,28 +73,26 @@ def menu_type(flag, obj):
 
     return flag
 
-def play_menu(obj, param, engine, const):
+def play_menu(obj, engine, const):
     """
     Function, which processes rocket parameters and calculate new step
     :param obj: object of class Rocket from sandbox file
-    :param param:  array of x position, y position, x axes velocity, y axes velocity, relative to the center of planet
     :param engine: object of class PhysicsEngine from trajetcory_calculation file
     :param const: object of class Constants from trajetcory_calculation file
     :return: obj, engine, const
     """
-    if param is None:
+    if engine is None:
         param = [6.37e6, 0, 0, 0]
         initial_parameters = obj.get_active_parameters()
-        #print(initial_parameters)
+        print(initial_parameters)
         engine = trajectory_calculation.PhysicsEngine(*initial_parameters, param)
         const = engine.constants
-        engine.switch_engine(True, 100)
-        engine.set_rocket_direction(0)
-
+        engine.switch_engine(True)
+        engine.set_rocket_direction(trajectory_calculation.np.pi / 6)
+    print(engine.rocket_parameters.parameters, engine.rocket_parameters.current_stage_mass)
     return obj, engine, const
 
 
-initial_position = None
 rocket_engine = None
 constants = None
 
@@ -108,7 +106,7 @@ while not finished:
     flag_menu = menu_type(flag_menu, rocket)
 
     if flag_menu == "play menu":
-        rocket, rocket_engine, constants = play_menu(rocket, initial_position, rocket_engine, constants)
+        rocket, rocket_engine, constants = play_menu(rocket, rocket_engine, constants)
         rocket_engine.process_step()
         draw_everything()
 

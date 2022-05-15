@@ -156,13 +156,13 @@ class Tanks(Parts):
         Parts.__init__(self, int(width * 0.11), int(height * 0.32), window, rocket=rocket, text="Fuel tanks", size=30)
 
         self.arr = [
-            PartsButton(parts.FuelTank(rocket.surface, capacity=20000, mass=2000), pos=(int(width * 0.04), height / 2),
+            PartsButton(parts.FuelTank(rocket.surface, capacity=20000, mass=22000), pos=(int(width * 0.04), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_180x180.png")),
-            PartsButton(parts.FuelTank(rocket.surface, capacity=30000, mass=3000), pos=(int(width * 0.09), height / 2),
+            PartsButton(parts.FuelTank(rocket.surface, capacity=30000, mass=33000), pos=(int(width * 0.09), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_180x240.png")),
-            PartsButton(parts.FuelTank(rocket.surface, capacity=35000, mass=3500), pos=(int(width * 0.15), height / 2),
+            PartsButton(parts.FuelTank(rocket.surface, capacity=35000, mass=38500), pos=(int(width * 0.15), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_270x180.png")),
-            PartsButton(parts.FuelTank(rocket.surface, capacity=45000, mass=4500), pos=(int(width * 0.20), height / 2),
+            PartsButton(parts.FuelTank(rocket.surface, capacity=45000, mass=49500), pos=(int(width * 0.20), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_360x180.png"))
         ]
 
