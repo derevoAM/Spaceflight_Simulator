@@ -1,18 +1,20 @@
 import pygame
 import sys
 import parts
-# import random
+import random
 
 BG = pygame.image.load("Textures/sandbox_menu/sandbox_back.png")
 
-# pygame.mixer.init()
-# playlist = [
-#     "Textures/music/Trava_u_doma.mp3",
-#     "Textures/music/Star_finder.mp3",
-#     "Textures/music/Fly_Me_To_The_Moon.mp3",
-#     "Textures/music/Counting_Stars.mp3",
-#     "Textures/music/Boyfriend.mp3"
-# ]
+pygame.mixer.init()
+playlist = [
+    "Textures/music/Trava_u_doma.mp3",
+    "Textures/music/Star_finder.mp3",
+    "Textures/music/Fly_Me_To_The_Moon.mp3",
+    "Textures/music/Counting_Stars.mp3",
+    "Textures/music/Boyfriend.mp3",
+    "Textures/music/My_Way.mp3",
+    "Textures/music/Stop.mp3",
+]
 
 
 class Button:
@@ -224,10 +226,6 @@ def upload_text(arr, mouse_pos, screen):
 def sandbox(SCREEN, flag, width, height, rocket):
     SCREEN.blit(BG, (0, 0))
 
-    # if pygame.mixer.music.get_busy() is False:
-    #     pygame.mixer.music.load(playlist[random.randint(0, 4)])
-    #     pygame.mixer.music.play(loops=0)
-
     menu_mouse_pos = pygame.mouse.get_pos()
 
     create_rocket = Parts(width / 2, 40, SCREEN)
@@ -245,8 +243,17 @@ def sandbox(SCREEN, flag, width, height, rocket):
         pos=(width - 100, height - 150), text_input="RESTART")
     back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 50), text_input="BACK")
+    play_music_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (40, 40)),
+        pos=(width - 100, 50), text_input="|>")
+    pause_music_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (40, 40)),
+        pos=(width - 100, 100), text_input="||")
+    unpause_music_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (40, 40)),
+        pos=(width - 100, 150), text_input="||>")
 
-    text_array = [play_button, restart_button, back_button]
+    text_array = [play_button, restart_button, back_button, play_music_button, pause_music_button, unpause_music_button]
 
     upload_text(text_array, menu_mouse_pos, SCREEN)
 
@@ -274,6 +281,16 @@ def sandbox(SCREEN, flag, width, height, rocket):
                 for part in segments.arr:
                     if part.check_for_input(menu_mouse_pos):
                         rocket.add_part(part.entity)
+            if play_music_button.check_for_input(menu_mouse_pos):
+                pygame.mixer.music.stop()
+                if pygame.mixer.music.get_busy() is False:
+                    pygame.mixer.music.load(playlist[random.randint(0, 6)])
+                    pygame.mixer.music.play(loops=0)
+            if pause_music_button.check_for_input(menu_mouse_pos):
+                pygame.mixer.music.pause()
+            if unpause_music_button.check_for_input(menu_mouse_pos):
+                pygame.mixer.music.unpause()
+
             # if QUIT_BUTTON.checkForInput(menu_mouse_pos):
             #     pygame.quit()
             #     sys.exit()
