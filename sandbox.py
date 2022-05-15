@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pygame
-import pygame.draw as dr
 
 # import textures as t
 import parts as p
@@ -25,12 +24,8 @@ class Rocket:
         Конструктор ракеты
         инициализирует поля, являющиеся характеристиками холста ракеты и для подсчёта траектории
         """
-        self.grid_x = 30
-        self.grid_y = 20
-        self.block_x = 100
-        self.block_y = 100
-        self.width = self.grid_x * self.block_x
-        self.height = self.grid_y * self.block_y
+        self.width = 100
+        self.height = 800
         self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
         self.parts = []
 
@@ -88,16 +83,20 @@ class Rocket:
         После этого слетит сетка, но зато избавимся от копий деталей
         Операция жрёт время (потенциально)
         """
-        x_min = self.width
-        y_min = self.width
+        fuel_tanks_y = [0]
+        cabin_height = 0
+        part_counter = 0
         for part_entity in self.parts:
-            if part_entity.x < x_min:
-                x_min = part_entity.x
-            if part_entity.y < y_min:
-                y_min = part_entity.y
+            if part_entity.type == "fueltank":
+                fuel_tanks_y.append(fuel_tanks_y[-1] + part_entity.texture.get_height())
+            elif part_entity.type == "cabin":
+                cabin_height = part_entity.texture.get_height()
         for part_entity in self.parts:
-            part_entity.x -= x_min
-            part_entity.y -= y_min
+            if part_entity.type == "fueltank":
+                part_entity.y = cabin_height + fuel_tanks_y[part_counter]
+                part_counter += 1
+            elif part_entity.type == "engine":
+                part_entity.y = cabin_height + fuel_tanks_y[-1]
         self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
         for part_entity in self.parts:
             part_entity.surface = self.surface
@@ -109,23 +108,11 @@ class Rocket:
         """
         return self.surface
 
-    def draw_grid(self):
-        """
-        рисует сетку с шагом grid_x по оси х и grid_y по оси y
-        """
-        grey = (125, 125, 125)
-        for i in range(self.block_x + 1):
-            dr.line(self.surface, grey, (i * self.grid_x, 0), (i * self.grid_x, self.height))
-        for j in range(self.block_y + 1):
-            dr.line(self.surface, grey, (0, j * self.grid_y), (self.width, j * self.grid_y))
-
-    def draw(self, gridded=0):
+    def draw(self):
         """
         Просто отрисовывает все составляющие ракеты на её экране
         gridded отвечает за сетку на экране (ри True - рисует, при false - иначе)
         """
-        if gridded:
-            self.draw_grid()
         for part_entity in self.parts:
             part_entity.draw()
 
@@ -142,6 +129,7 @@ def load_rocket(sourcefile):
         part_line_array = part_line.split()
         part_type = part_line_array[0]
         print(part_type, part_line_array[1], part_line_array[2])
+        part_entity = None
         if part_type == "engine":
             # А другие параметры не волнуют, ракету мы загружаем только при старте
             part_entity = p.Engine(0, x=int(part_line_array[1]), y=int(part_line_array[2]))
@@ -164,30 +152,43 @@ def save_rocket(rocket_entity, outfile):
             file.write(str(part_entity.type) + " " + str(part_entity.x) + " " + str(part_entity.y) + "\n")
 
 
-'''
-screen = pygame.display.set_mode((900, 900))
-engine = p.Engine(0, x = 4, y = 140)
-r = load_rocket("rockets/test.txt")
-save_rocket(r, "rockets/test_save.txt")
-#r.add_part(engine)
-#r.recount()
-r.draw(gridded=0)
-screen.blit(r.get_surface(), dest=[0,0])
-pygame.display.update()
-clock = pygame.time.Clock()
-finished = False
-
-while not finished:
-    clock.tick(60)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            finished = True
-
-pygame.quit()'''
-
 ## Тестирую на совместимость!
 
 if __name__ == "__main__":
+    screen = pygame.display.set_mode((900, 900))
+    r = Rocket()
+    engine1 = p.Engine(0)
+    engine1.texture = pygame.image.load("textures/engines/big_engine_100x75.png")
+    fueltank1 = p.FuelTank(0)
+    fueltank1.texture = pygame.image.load("textures/tanks/tank_simple_50x75.png")
+    fueltank2 = p.FuelTank(0)
+    fueltank2.texture = pygame.image.load("textures/tanks/tank_simple_50x75.png")
+    fueltank3 = p.FuelTank(0)
+    fueltank3.texture = pygame.image.load("textures/tanks/tank_simple_50x75.png")
+    r.add_part(fueltank1)
+    r.add_part(fueltank2)
+    r.add_part(fueltank3)
+    r.add_part(engine1)
+    capsule = p.Cabin(0)
+    capsule.texture = pygame.image.load("textures/capsule/capsule_60x40.png")
+    r.add_part(capsule)
+    screen.blit(r.surface, dest = [400, 0])
+    r.recount()
+    screen.blit(r.surface, dest = [0,0])
+
+    pygame.display.update()
+    clock = pygame.time.Clock()
+    finished = False
+
+    while not finished:
+        clock.tick(60)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+
+    pygame.quit()
+
+    '''
     constants = trajectory_calculation.Constants()
 
     rocket = load_rocket("rockets/test.txt")
@@ -246,3 +247,4 @@ if __name__ == "__main__":
     ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
 
     plt.show()
+    '''
