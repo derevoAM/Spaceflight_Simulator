@@ -55,19 +55,20 @@ def draw_everything(engine):
 flag_menu = "main menu"
 
 
-def menu_type(flag, obj):
+def menu_type(flag, obj, part_type):
     """
     Function, that determines which menu to show
     :param flag: type of menu: main, sandbox, play
     :param obj: rocket
-    :return: flag
+    :param part_type: part of a rocket, which is being selected in this particular moment
+    :return: flag, part_type
     """
     if flag == "main menu":
         flag = main_menu.main_menu(window, flag)
     elif flag == "sandbox menu":
-        flag, obj = sandbox_menu.sandbox(window, flag, window_width, window_height, obj, events)
+        flag, obj, part_type = sandbox_menu.sandbox(window, flag, window_width, window_height, obj, events, part_type)
 
-    return flag
+    return flag, part_type
 
 
 def play_menu(obj, engine, const, flag, start):
@@ -150,6 +151,7 @@ constants = None
 
 flag_turn = "None"
 flag_power = "None"
+part_size = ["engine", 0]
 while not finished:
 
     clock.tick(FPS)
@@ -157,7 +159,7 @@ while not finished:
 
     events = pygame.event.get()
 
-    flag_menu = menu_type(flag_menu, rocket)
+    flag_menu, part_size = menu_type(flag_menu, rocket, part_size)
 
     if flag_menu == "play menu":
         #if seconds - flag_seconds >= 1/20:
