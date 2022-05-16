@@ -94,9 +94,7 @@ class PhysicsEngine:
         """
         Function to detect collision with Earth and Moon
         """
-        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < self.constants.rad_Earth or np.linalg.norm(
-                self.rocket_parameters.parameters[:2] - self.calc_moon_position(
-                    self.rocket_parameters.current_time)) < self.constants.rad_Moon:
+        if np.linalg.norm(self.rocket_parameters.parameters[:2]) < self.constants.rad_Earth:
             self.rocket_parameters.collision_flag = True
 
     def calc_rho(self, position_norm):
@@ -146,7 +144,6 @@ class PhysicsEngine:
     def calc_acceleration_engine(self):
         """
         Calculating acceleration by engine working
-        :param velocity_norm: the norm of rocket speed
         :return: [ax, ay] array consisting of acceleration values for each axis
         """
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
@@ -211,7 +208,7 @@ class PhysicsEngine:
         k_4 = self.calc_differential(self.rocket_parameters.parameters + self.constants.step * k_3,
                                      self.rocket_parameters.current_time + 0.5 * self.constants.step)
 
-        self.reduce_mass()
+        # self.reduce_mass()
 
         self.rocket_parameters.parameters += (k_1 + 2 * (k_2 + k_3) + k_4) * self.constants.step / 6
         self.rocket_parameters.current_time += self.constants.step
@@ -251,11 +248,12 @@ class PhysicsEngine:
         predicative_orbit[0] = self.rocket_parameters.parameters
         count = 0
 
-        while count < log_size - 1:
+        while count < log_size - 1 and not np.linalg.norm(predicative_orbit[count][:2]) < self.constants.rad_Earth:
             count += 1
             predicative_orbit[count], time_array[count] = self.calc_step_euler(predicative_orbit[count - 1],
                                                                                time_array[count - 1])
 
+        predicative_orbit = np.resize(predicative_orbit, (count, 4))
         self.rocket_parameters.predicative_orbit = predicative_orbit
 
     def process_step(self):
@@ -268,8 +266,9 @@ class PhysicsEngine:
 
 
 if __name__ == "__main__":
-    initial_position = [6.5e6, 0, 0, 0]
+    initial_position = [7e6, 0, 0, 3000]
     engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
+    # engine.switch_engine(True, 1)
     engine.switch_engine(False)
     size = 500000
 
@@ -280,20 +279,30 @@ if __name__ == "__main__":
     step_time = 5  # шаг расчета
     counter = 0  # счетчик
 
-    engine.set_rocket_direction(np.pi / 3)
+    engine.set_rocket_direction(0)
 
-    while counter < 10000 and not engine.rocket_parameters.collision_flag:
+    while counter < 1000 and not engine.rocket_parameters.is_empty():
         counter += 1
         engine.process_step()
         position_and_velocity_log[counter] = engine.rocket_parameters.parameters
-        print(engine.rocket_parameters.parameters)
+        predicative_orbit_log = engine.rocket_parameters.predicative_orbit
+
+    engine.set_rocket_direction(np.pi / 2)
+    # engine.switch_engine(True, 10)
+    engine.rocket_parameters.fuel_remained = 300000
+    while counter < 1000 and not engine.rocket_parameters.collision_flag and not engine.rocket_parameters.is_empty():
+        counter += 1
+        engine.process_step()
+        position_and_velocity_log[counter] = engine.rocket_parameters.parameters
         predicative_orbit_log = engine.rocket_parameters.predicative_orbit
 
     fig, ax = plt.subplots()
+    print(predicative_orbit_log)
+
     plt.axis('equal')
     ax.add_patch(plt.Circle((0, 0), engine.constants.rad_Earth))
     ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=1)
-    # ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
+    ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
 
     plt.show()
 
