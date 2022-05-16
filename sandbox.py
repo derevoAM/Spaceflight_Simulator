@@ -22,7 +22,7 @@ class Rocket:
         self.width = 100
         self.height = 800
         self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
-        self.angle = 0
+        self.angle = -90
         self.parts = []
 
         self.physics_engine = None

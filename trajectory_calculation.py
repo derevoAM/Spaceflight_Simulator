@@ -21,7 +21,7 @@ class Constants:
         self.moon_rad = 3.85e8  # радиус орбиты Луны
         self.moon_period = 27.3 * 24 * 3600 / 2 / np.pi  # период обращения Луны вокруг Земли в с/рад
         self.initial_fas = 99 / 180 * np.pi  # начальная фаза Луны (которую нужно подогнать)
-        self.log_size = 1000
+        self.log_size = 500
 
         self.gas_exhaust_speed = gas_exhaust_speed  # скорость истечения топлива
         self.fuel_consumption = fuel_consumption  # расход топлива
@@ -37,7 +37,7 @@ class RocketParameters:
         self.parameters = np.array(initial_parameters)
         self.direction = np.array([1, 0])
         self.current_time = 0.0
-        self.predicative_orbit = np.ndarray(shape=(100, 4), dtype=float)
+        self.predicative_orbit = np.ndarray(shape=(0, 4), dtype=float)
 
         self.current_stage_mass = initial_rocket_mass  # масса ступени текущая
         self.fuel_remained = fuel
@@ -232,7 +232,7 @@ class PhysicsEngine:
         :return: predicative [new_x, new_y, new_vx, new_vy] array
         """
         return predicative_parameters + self.calc_differential_euler(predicative_parameters,
-                                                                     time) * self.constants.step * 5, time + self.constants.step * 5
+                                                                     time) * self.constants.step * 20, time + self.constants.step * 5
 
     def calc_predicative_orbit(self):
         """
