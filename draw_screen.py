@@ -64,25 +64,28 @@ class View:
 
 class RocketView(View):
     def __init__(self, width, height, rocket):
-        View.__init__(self, width / 2, height, width / 2, 0, rocket)
+        View.__init__(self, width / 2, 2 * height / 3, 0, height / 3, rocket)
         self.color = SKY
 
     def draw(self, engine):
-        self.surface.fill(SKY)
+        self.surface.fill((0, 0, 0, 0))
+        self.surface.blit(pygame.image.load("Textures/View_background/stars.jpg"), (0, 0))
         self.rocket.recount()
         self.rocket.draw()
         pygame.draw.line(self.surface, BLACK, (self.width / 2, 0), (self.width / 2, self.height))
         h = 0
         for part in self.rocket.parts:
             h += part.texture.get_size()[1]
+        h /= 1.5
+        self.rocket.surface = pygame.transform.scale(self.rocket.surface, (100 / 1.2, 800 / 1.5))
         blit_rotate(self.surface, self.rocket.surface,
                     (self.width / 2, self.height / 2),
-                    (self.rocket.parts[0].texture.get_size()[0] / 2, h / 2), self.rocket.angle)
+                    (self.rocket.parts[0].texture.get_size()[0] / (2 * 1.2), h / 2), self.rocket.angle)
 
 
 class ParametersView(View):
     def __init__(self, width, height, rocket):
-        View.__init__(self, width / 2, height / 2, 0, 0, rocket)
+        View.__init__(self, width / 2, height / 3, 0, 0, rocket)
         self.font = pygame.font.Font(None, 40)
 
     def draw(self, engine):
@@ -109,14 +112,14 @@ class ParametersView(View):
 
 class SpaceView(View):
     def __init__(self, width, height, rocket):
-        View.__init__(self, width / 2, height / 2, 0, height / 2, rocket)
+        View.__init__(self, width / 2, height, width / 2, 0, rocket)
 
     def draw(self, engine):
         self.surface.fill(BLACK)
-        scale = self.height / (4 * engine.constants.rad_Earth)
+        scale = self.height / (3 * engine.constants.rad_Earth)
         x = engine.rocket_parameters.parameters[0]
         y = engine.rocket_parameters.parameters[1]
-        pygame.draw.circle(self.surface, EARTH, (self.width / 2, self.height / 2), self.height / 4)
+        pygame.draw.circle(self.surface, EARTH, (self.width / 2, self.height / 2), self.height / 3)
         pygame.draw.circle(self.surface, GREEN, (scale * x + self.width / 2, -scale * y + self.height / 2), 4)
         for current in engine.rocket_parameters.predicative_orbit:
             pygame.draw.circle(self.surface, WHITE,

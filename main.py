@@ -160,7 +160,7 @@ while not finished:
     flag_menu = menu_type(flag_menu, rocket)
 
     if flag_menu == "play menu":
-        if seconds - flag_seconds >= 0.5:
+        if seconds - flag_seconds >= 1/20:
             flag_seconds = seconds
             rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, flag_turn)
 
