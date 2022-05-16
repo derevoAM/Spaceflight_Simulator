@@ -78,13 +78,11 @@ class PhysicsEngine:
 
     def reduce_mass(self):
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
-            self.rocket_parameters.current_stage_mass -= self.rocket_parameters.engine_power * self.constants.step * \
-                                                         self.constants.fuel_consumption
             self.rocket_parameters.fuel_remained -= self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
+            self.rocket_parameters.current_stage_mass -= self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
 
-        if self.rocket_parameters.current_stage_mass <= 100:
-            self.rocket_parameters.current_stage_mass = self.constants.initial_mass - self.constants.fuel_tank_capacity
-            print(self.rocket_parameters.current_stage_mass)
+        if self.rocket_parameters.fuel_remained <= 0:
+            self.rocket_parameters.fuel_remained = 0
 
     def switch_engine(self, flag, power=1.0):
         self.rocket_parameters.engine_is_on_flag = flag
@@ -208,7 +206,7 @@ class PhysicsEngine:
         k_4 = self.calc_differential(self.rocket_parameters.parameters + self.constants.step * k_3,
                                      self.rocket_parameters.current_time + 0.5 * self.constants.step)
 
-        # self.reduce_mass()
+        self.reduce_mass()
 
         self.rocket_parameters.parameters += (k_1 + 2 * (k_2 + k_3) + k_4) * self.constants.step / 6
         self.rocket_parameters.current_time += self.constants.step
@@ -266,10 +264,10 @@ class PhysicsEngine:
 
 
 if __name__ == "__main__":
-    initial_position = [7e6, 0, 0, 3000]
+    initial_position = [7e6, 0, 0, 5500]
     engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
     # engine.switch_engine(True, 1)
-    engine.switch_engine(False)
+    engine.switch_engine(True, 1)
     size = 500000
 
     position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
