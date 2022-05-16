@@ -116,10 +116,10 @@ class SpaceView(View):
 
     def draw(self, engine):
         self.surface.fill(BLACK)
-        scale = self.height / (3 * engine.constants.rad_Earth)
+        scale = self.height / (6 * engine.constants.rad_Earth)
         x = engine.rocket_parameters.parameters[0]
         y = engine.rocket_parameters.parameters[1]
-        pygame.draw.circle(self.surface, EARTH, (self.width / 2, self.height / 2), self.height / 3)
+        pygame.draw.circle(self.surface, EARTH, (self.width / 2, self.height / 2), self.height / 6)
         pygame.draw.circle(self.surface, GREEN, (scale * x + self.width / 2, -scale * y + self.height / 2), 4)
         for current in engine.rocket_parameters.predicative_orbit:
             pygame.draw.circle(self.surface, WHITE,

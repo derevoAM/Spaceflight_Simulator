@@ -141,7 +141,7 @@ def rocket_controls(eve, turn, power):
                     power = "reduce"
                     rocket_engine.rocket_parameters.engine_power -= 1
 
-    rocket_engine.set_rocket_direction(trajectory_calculation.np.deg2rad(rocket.angle))
+    rocket_engine.set_rocket_direction(trajectory_calculation.np.deg2rad(rocket.angle + 90))
     return turn, power
 
 
@@ -160,9 +160,9 @@ while not finished:
     flag_menu = menu_type(flag_menu, rocket)
 
     if flag_menu == "play menu":
-        if seconds - flag_seconds >= 1/20:
-            flag_seconds = seconds
-            rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, flag_turn)
+        #if seconds - flag_seconds >= 1/20:
+        flag_seconds = seconds
+        rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, flag_turn)
 
         flag_turn, flag_power = rocket_controls(events, flag_turn, flag_power)
 
