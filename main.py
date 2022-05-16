@@ -22,8 +22,6 @@ window_width, window_height = pygame.display.get_surface().get_size()
 # Initialize a rocket
 rocket = sandbox.Rocket()
 
-# rocket_parameters.rocket_parameters.predicative_orbit
-
 Rocket_surface = draw_screen.RocketView(window_width, window_height, rocket)
 Space_surface = draw_screen.SpaceView(window_width, window_height, rocket)
 Parameters_surface = draw_screen.ParametersView(window_width, window_height, rocket)
@@ -44,16 +42,14 @@ flag_seconds = 0
 flag_start = 0
 
 
-def draw_everything():
+def draw_everything(engine):
     """
     Drawing play menu, which include 3 views
     :return:
     """
     for view in Views:
-        view.draw(rocket_engine)
+        view.draw(engine)
         window.blit(view.surface, (view.x, view.y))
-
-
 
 
 flag_menu = "main menu"
@@ -73,13 +69,13 @@ def menu_type(flag, obj):
 
     return flag
 
-def play_menu(obj, engine, const, eve, flag):
+
+def play_menu(obj, engine, const, flag):
     """
     Function, which processes rocket parameters and calculate new step
     :param obj: object of class Rocket from sandbox file
     :param engine: object of class PhysicsEngine from trajetcory_calculation file
     :param const: object of class Constants from trajetcory_calculation file
-    :param eve: events
     :param flag: shows whether right or left arrow was pressed
     :return: obj, engine, const
     """
@@ -92,35 +88,68 @@ def play_menu(obj, engine, const, eve, flag):
         engine.switch_engine(True, 100)
         engine.set_rocket_direction(0)
 
-    if flag == "right":
+    engine.process_step()
+    draw_everything(engine)
+
+    # print(engine.rocket_parameters.parameters, engine.rocket_parameters.current_stage_mass)
+    print(engine.rocket_parameters.engine_power)
+    return obj, engine, const, flag
+
+
+def rocket_controls(eve, turn, power):
+    """
+    Analyzing keyboard inputs and controlling the rocket
+    :param eve: events
+    :param turn: flag that shows whether right or left arrow was pressed
+    :param power: flag that shows whether Shift(increase speed) or CTRL(reduce speed) was pressed
+    :return:
+    """
+    if turn == "right":
         rocket.angle -= 0.5
-    if flag == "left":
+    if turn == "left":
         rocket.angle += 0.5
+
+    if (power == "increase") and (rocket_engine.rocket_parameters.engine_power < 100):
+        rocket_engine.rocket_parameters.engine_power += 1
+    if (power == "reduce") and (rocket_engine.rocket_parameters.engine_power > 0):
+        rocket_engine.rocket_parameters.engine_power -= 1
+
     for inc in eve:
-        if flag == "right":
-            if (inc.type == pygame.KEYUP) and (inc.key == pygame.K_RIGHT):
-                flag = "None"
-        if flag == "left":
-            if (inc.type == pygame.KEYUP) and (inc.key == pygame.K_LEFT):
-                flag = "None"
+        if (turn == "right") and (inc.type == pygame.KEYUP) and (inc.key == pygame.K_RIGHT):
+            turn = "None"
+        if (turn == "left") and (inc.type == pygame.KEYUP) and (inc.key == pygame.K_LEFT):
+            turn = "None"
+
+        if (power == "increase") and (inc.type == pygame.KEYUP) and (inc.key == pygame.K_LSHIFT):
+            power = "None"
+        if (power == "reduce") and (inc.type == pygame.KEYUP) and (inc.key == pygame.K_LCTRL):
+            power = "None"
 
         if inc.type == pygame.KEYDOWN:
             if inc.key == pygame.K_RIGHT:
-                flag = "right"
+                turn = "right"
                 rocket.angle -= 0.5
             if inc.key == pygame.K_LEFT:
-                flag = "left"
+                turn = "left"
                 rocket.angle += 0.5
+            if inc.key == pygame.K_LSHIFT:
+                if rocket_engine.rocket_parameters.engine_power < 100:
+                    power = "increase"
+                    rocket_engine.rocket_parameters.engine_power += 1
+            if inc.key == pygame.K_LCTRL:
+                if rocket_engine.rocket_parameters.engine_power > 0:
+                    power = "reduce"
+                    rocket_engine.rocket_parameters.engine_power -= 1
 
-    engine.set_rocket_direction(trajectory_calculation.np.deg2rad(rocket.angle))
-    print(engine.rocket_parameters.parameters, engine.rocket_parameters.current_stage_mass)
-    return obj, engine, const, flag
+    rocket_engine.set_rocket_direction(trajectory_calculation.np.deg2rad(rocket.angle))
+    return turn, power
 
 
 rocket_engine = None
 constants = None
 
 flag_turn = "None"
+flag_power = "None"
 while not finished:
 
     clock.tick(FPS)
@@ -131,9 +160,11 @@ while not finished:
     flag_menu = menu_type(flag_menu, rocket)
 
     if flag_menu == "play menu":
-        rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, events, flag_turn)
-        rocket_engine.process_step()
-        draw_everything()
+        if seconds - flag_seconds >= 0.5:
+            flag_seconds = seconds
+            rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, flag_turn)
+
+        flag_turn, flag_power = rocket_controls(events, flag_turn, flag_power)
 
     for event in events:
         if event.type == pygame.QUIT:
