@@ -21,7 +21,7 @@ class Constants:
         self.moon_rad = 3.85e8  # радиус орбиты Луны
         self.moon_period = 27.3 * 24 * 3600 / 2 / np.pi  # период обращения Луны вокруг Земли в с/рад
         self.initial_fas = 99 / 180 * np.pi  # начальная фаза Луны (которую нужно подогнать)
-        self.log_size = 300
+        self.log_size = 1000
 
         self.gas_exhaust_speed = gas_exhaust_speed  # скорость истечения топлива
         self.fuel_consumption = fuel_consumption  # расход топлива
