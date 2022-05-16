@@ -99,7 +99,7 @@ class ParametersView(View):
         height = self.font.render(f"Height = {((x ** 2 + y ** 2) ** 0.5 - engine.constants.rad_Earth) / 1000:.2f} км",
                                   True,
                                   [0, 0, 0])
-        fuel = self.font.render(f"Fuel = {engine.rocket_parameters.fuel_remained:.0f} т", True, [0, 0, 0])
+        fuel = self.font.render(f"Fuel = {engine.rocket_parameters.fuel_remained:.0f} кг", True, [0, 0, 0])
         power = self.font.render(f"Power = {engine.rocket_parameters.engine_power:.0f} %", True, [0, 0, 0])
         self.surface.blit(time, (self.width / 2 - 100, 30))
         self.surface.blit(height, (self.width / 2 - 100, 60))

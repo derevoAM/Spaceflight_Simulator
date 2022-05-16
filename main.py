@@ -70,13 +70,14 @@ def menu_type(flag, obj):
     return flag
 
 
-def play_menu(obj, engine, const, flag):
+def play_menu(obj, engine, const, flag, start):
     """
     Function, which processes rocket parameters and calculate new step
     :param obj: object of class Rocket from sandbox file
     :param engine: object of class PhysicsEngine from trajetcory_calculation file
     :param const: object of class Constants from trajetcory_calculation file
     :param flag: shows whether right or left arrow was pressed
+    :param start: flag, that shows whether rocket was launched
     :return: obj, engine, const
     """
     if engine is None:
@@ -85,14 +86,13 @@ def play_menu(obj, engine, const, flag):
         print(initial_parameters)
         engine = trajectory_calculation.PhysicsEngine(*initial_parameters, param)
         const = engine.constants
-        engine.switch_engine(True, 100)
+        engine.switch_engine(True, 0)
         engine.set_rocket_direction(0)
 
-    engine.process_step()
+    if flag_start == 1:
+        engine.process_step()
     draw_everything(engine)
 
-    # print(engine.rocket_parameters.parameters, engine.rocket_parameters.current_stage_mass)
-    print(engine.rocket_parameters.engine_power)
     return obj, engine, const, flag
 
 
@@ -105,14 +105,14 @@ def rocket_controls(eve, turn, power):
     :return:
     """
     if turn == "right":
-        rocket.angle -= 0.5
+        rocket.angle -= 1
     if turn == "left":
-        rocket.angle += 0.5
+        rocket.angle += 1
 
     if (power == "increase") and (rocket_engine.rocket_parameters.engine_power < 100):
-        rocket_engine.rocket_parameters.engine_power += 1
+        rocket_engine.rocket_parameters.engine_power += 2
     if (power == "reduce") and (rocket_engine.rocket_parameters.engine_power > 0):
-        rocket_engine.rocket_parameters.engine_power -= 1
+        rocket_engine.rocket_parameters.engine_power -= 2
 
     for inc in eve:
         if (turn == "right") and (inc.type == pygame.KEYUP) and (inc.key == pygame.K_RIGHT):
@@ -128,18 +128,18 @@ def rocket_controls(eve, turn, power):
         if inc.type == pygame.KEYDOWN:
             if inc.key == pygame.K_RIGHT:
                 turn = "right"
-                rocket.angle -= 0.5
+                rocket.angle -= 1
             if inc.key == pygame.K_LEFT:
                 turn = "left"
-                rocket.angle += 0.5
+                rocket.angle += 1
             if inc.key == pygame.K_LSHIFT:
                 if rocket_engine.rocket_parameters.engine_power < 100:
                     power = "increase"
-                    rocket_engine.rocket_parameters.engine_power += 1
+                    rocket_engine.rocket_parameters.engine_power += 2
             if inc.key == pygame.K_LCTRL:
                 if rocket_engine.rocket_parameters.engine_power > 0:
                     power = "reduce"
-                    rocket_engine.rocket_parameters.engine_power -= 1
+                    rocket_engine.rocket_parameters.engine_power -= 2
 
     rocket_engine.set_rocket_direction(trajectory_calculation.np.deg2rad(rocket.angle + 90))
     return turn, power
@@ -162,7 +162,7 @@ while not finished:
     if flag_menu == "play menu":
         #if seconds - flag_seconds >= 1/20:
         flag_seconds = seconds
-        rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, flag_turn)
+        rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, flag_turn, flag_start)
 
         flag_turn, flag_power = rocket_controls(events, flag_turn, flag_power)
 
