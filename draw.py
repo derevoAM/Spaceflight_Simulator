@@ -68,14 +68,16 @@ This means, the 2nd argument (pos) of blitRotate is the position of the pivot po
     surf.blit(rotated_image, rotated_image_rect)
 
     # draw rectangle around the image
-    pygame.draw.rect(surf, (255, 0, 0), (*rotated_image_rect.topleft, *rotated_image.get_size()), 2)
+    #pygame.draw.rect(surf, (255, 0, 0), (*rotated_image_rect.topleft, *rotated_image.get_size()), 2)
 
 
+'''
 pygame.init()
 drawing_screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 finished = False
 ir = 0
+
 
 while not finished:
     clock.tick(FPS)
@@ -90,3 +92,5 @@ while not finished:
             finished = True
 
 pygame.quit()
+'''
+

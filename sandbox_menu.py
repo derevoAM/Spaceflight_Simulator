@@ -181,13 +181,13 @@ class Engines(Parts):
     def __init__(self, window, width, height, rocket):
         Parts.__init__(self, int(width * 0.11), int(height * 0.64), window, rocket=rocket, text="Engines", size=30)
 
-        self.arr = [PartsButton(parts.Engine(rocket.surface, power=1000, consumption=100, mass=3000),
+        self.arr = [PartsButton(parts.Engine(rocket.surface, power=1000, consumption=10, mass=3000),
                                 pos=(int(width * 0.04), 3 * height / 4),
                                 image=pygame.image.load("Textures/engines/final/engine_180x120.png")),
                     PartsButton(parts.Engine(rocket.surface, power=2000, consumption=300, mass=5000),
                                 pos=(int(width * 0.10), 3 * height / 4),
                                 image=pygame.image.load("Textures/engines/final/engine_270x180.png")),
-                    PartsButton(parts.Engine(rocket.surface, power=4000, consumption=700, mass=9000),
+                    PartsButton(parts.Engine(rocket.surface, power=4000, consumption=70, mass=9000),
                                 pos=(int(width * 0.16), 3 * height / 4),
                                 image=pygame.image.load("Textures/engines/final/engine_360x240.png"))
                     ]

@@ -28,7 +28,7 @@ class Constants:
         self.fuel_tank_capacity = fuel_tank_capacity
         self.initial_mass = initial_mass
 
-        self.step = 5
+        self.step = 0.5
 
 
 class RocketParameters:
@@ -82,8 +82,9 @@ class PhysicsEngine:
                                                          self.constants.fuel_consumption
             self.rocket_parameters.fuel_remained -= self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
 
-        if self.rocket_parameters.current_stage_mass < self.constants.initial_mass - self.constants.fuel_tank_capacity:
+        if self.rocket_parameters.current_stage_mass <= 100:
             self.rocket_parameters.current_stage_mass = self.constants.initial_mass - self.constants.fuel_tank_capacity
+            print(self.rocket_parameters.current_stage_mass)
 
     def switch_engine(self, flag, power=1.0):
         self.rocket_parameters.engine_is_on_flag = flag

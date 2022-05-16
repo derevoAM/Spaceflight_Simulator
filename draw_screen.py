@@ -1,5 +1,4 @@
 import trajectory_calculation as tr
-
 import pygame
 
 SKY = [0, 42, 255]
@@ -10,10 +9,41 @@ BLACK = [0, 0, 0]
 WHITE = [255, 255, 255]
 
 
+def blit_rotate(surf, image, pos, originPos, angle):
+    """
+    In the following example program, the function blitRotate(surf, image, pos, originPos, angle) does all
+    the above steps and "blit" a rotated image to a surface.
+    :param surf is the target Surface
+    :param image is the Surface which has to be rotated and blit
+    :param pos is the position of the pivot on the target Surface surf (relative to the top left of surf)
+    :param originPos is position of the pivot on the image Surface (relative to the top left of image)
+    :param angle is the angle of rotation in degrees
+This means, the 2nd argument (pos) of blitRotate is the position of the pivot point in the window and the
+ 3rd argument (originPos) is the position of the pivot point on the rotating Surface:
+    """
+    # offset from pivot to center
+    image_rect = image.get_rect(topleft=(pos[0] - originPos[0], pos[1] - originPos[1]))
+    offset_center_to_pivot = pygame.math.Vector2(pos) - image_rect.center
+
+    # roatated offset from pivot to center
+    rotated_offset = offset_center_to_pivot.rotate(-angle)
+
+    # roatetd image center
+    rotated_image_center = (pos[0] - rotated_offset.x, pos[1] - rotated_offset.y)
+
+    # get a rotated image
+    rotated_image = pygame.transform.rotate(image, angle)
+    rotated_image_rect = rotated_image.get_rect(center=rotated_image_center)
+
+    # rotate and blit the image
+    surf.blit(rotated_image, rotated_image_rect)
+
+
 class View:
     """
     Class of different views
     """
+
     def __init__(self, width, height, x, y, rocket):
         self.width = int(width)
         self.height = int(height)
@@ -41,7 +71,13 @@ class RocketView(View):
         self.surface.fill(SKY)
         self.rocket.recount()
         self.rocket.draw()
-        self.surface.blit(self.rocket.get_surface(), (0, 0))
+        pygame.draw.line(self.surface, BLACK, (self.width / 2, 0), (self.width / 2, self.height))
+        h = 0
+        for part in self.rocket.parts:
+            h += part.texture.get_size()[1]
+        blit_rotate(self.surface, self.rocket.surface,
+                    (self.width / 2, self.height / 2),
+                    (self.rocket.parts[0].texture.get_size()[0] / 2, h / 2), self.rocket.angle)
 
 
 class ParametersView(View):
@@ -50,15 +86,15 @@ class ParametersView(View):
         self.font = pygame.font.Font(None, 40)
 
     def draw(self, engine):
-
         self.surface.fill(GREY)
         x = engine.rocket_parameters.parameters[0]
         y = engine.rocket_parameters.parameters[1]
         vx = engine.rocket_parameters.parameters[2]
         vy = engine.rocket_parameters.parameters[3]
         speed = self.font.render(f"Speed = {((vx ** 2 + vy ** 2) ** 0.5):.2f} м/c", True, [0, 0, 0])
-        height = self.font.render(f"Height = {((x ** 2 + y ** 2) ** 0.5 - engine.constants.rad_Earth) / 1000:.2f} км", True,
-                             [0, 0, 0])
+        height = self.font.render(f"Height = {((x ** 2 + y ** 2) ** 0.5 - engine.constants.rad_Earth) / 1000:.2f} км",
+                                  True,
+                                  [0, 0, 0])
         self.surface.blit(speed, (self.width / 2 - 100, 100))
         self.surface.blit(height, (self.width / 2 - 100, 60))
 
@@ -73,4 +109,7 @@ class SpaceView(View):
         x = engine.rocket_parameters.parameters[0]
         y = engine.rocket_parameters.parameters[1]
         pygame.draw.circle(self.surface, EARTH, (self.width / 2, self.height / 2), self.height / 4)
-        pygame.draw.circle(self.surface, WHITE, (scale * x + self.width / 2, -scale * y + self.height / 2), 10)
+        pygame.draw.circle(self.surface, GREEN, (scale * x + self.width / 2, -scale * y + self.height / 2), 4)
+        for current in engine.rocket_parameters.predicative_orbit:
+            pygame.draw.circle(self.surface, WHITE,
+                               (scale * current[0] + self.width / 2, -scale * current[1] + self.height / 2), 1)

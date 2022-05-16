@@ -73,12 +73,14 @@ def menu_type(flag, obj):
 
     return flag
 
-def play_menu(obj, engine, const):
+def play_menu(obj, engine, const, eve, flag):
     """
     Function, which processes rocket parameters and calculate new step
     :param obj: object of class Rocket from sandbox file
     :param engine: object of class PhysicsEngine from trajetcory_calculation file
     :param const: object of class Constants from trajetcory_calculation file
+    :param eve: events
+    :param flag: shows whether right or left arrow was pressed
     :return: obj, engine, const
     """
     if engine is None:
@@ -87,15 +89,38 @@ def play_menu(obj, engine, const):
         print(initial_parameters)
         engine = trajectory_calculation.PhysicsEngine(*initial_parameters, param)
         const = engine.constants
-        engine.switch_engine(True)
-        engine.set_rocket_direction(trajectory_calculation.np.pi / 6)
+        engine.switch_engine(True, 100)
+        engine.set_rocket_direction(0)
+
+    if flag == "right":
+        rocket.angle -= 0.5
+    if flag == "left":
+        rocket.angle += 0.5
+    for inc in eve:
+        if flag == "right":
+            if (inc.type == pygame.KEYUP) and (inc.key == pygame.K_RIGHT):
+                flag = "None"
+        if flag == "left":
+            if (inc.type == pygame.KEYUP) and (inc.key == pygame.K_LEFT):
+                flag = "None"
+
+        if inc.type == pygame.KEYDOWN:
+            if inc.key == pygame.K_RIGHT:
+                flag = "right"
+                rocket.angle -= 0.5
+            if inc.key == pygame.K_LEFT:
+                flag = "left"
+                rocket.angle += 0.5
+
+    engine.set_rocket_direction(trajectory_calculation.np.deg2rad(rocket.angle))
     print(engine.rocket_parameters.parameters, engine.rocket_parameters.current_stage_mass)
-    return obj, engine, const
+    return obj, engine, const, flag
 
 
 rocket_engine = None
 constants = None
 
+flag_turn = "None"
 while not finished:
 
     clock.tick(FPS)
@@ -106,7 +131,7 @@ while not finished:
     flag_menu = menu_type(flag_menu, rocket)
 
     if flag_menu == "play menu":
-        rocket, rocket_engine, constants = play_menu(rocket, rocket_engine, constants)
+        rocket, rocket_engine, constants, flag_turn = play_menu(rocket, rocket_engine, constants, events, flag_turn)
         rocket_engine.process_step()
         draw_everything()
 
