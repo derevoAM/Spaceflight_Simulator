@@ -37,7 +37,7 @@ class RocketParameters:
         self.parameters = np.array(initial_parameters)
         self.direction = np.array([1, 0])
         self.current_time = 0.0
-        self.predicative_orbit = np.ndarray(shape=(None, 4), dtype=float)
+        self.predicative_orbit = np.ndarray(shape=(0, 4), dtype=float)
 
         self.current_stage_mass = initial_rocket_mass  # масса ступени текущая
         self.fuel_remained = fuel
