@@ -14,7 +14,7 @@ playlist = [
     "Textures/music/Boyfriend.mp3",
     "Textures/music/My_Way.mp3",
     "Textures/music/Stop.mp3",
-]
+]  # FIXME DO we need comments in here?
 
 
 class Button:
@@ -65,6 +65,11 @@ class ButtonText(Button):
         screen.blit(self.text, self.text_rect)
 
     def change_color(self, position):
+        """
+        Changes the text color of a button if the mouse pointer is located on a button. 
+        :param position: 
+        :return: 
+        """
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
                                                                                           self.rect.bottom):
             self.text = self.font.render(self.text_input, True, self.hovering_color)
@@ -143,6 +148,10 @@ class Cabin(Parts):
                                 image=pygame.image.load("Textures/capsule/final/capsule_270x180.png"))]
 
     def resize(self):
+        """
+        Resizes the size of Cabin parts.
+        :return: 
+        """
         self.arr[0].entity.texture = pygame.transform.scale(self.arr[0].image, (90, 60))
         self.arr[1].entity.texture = pygame.transform.scale(self.arr[1].image, (60, 40))
 
@@ -167,6 +176,10 @@ class Tanks(Parts):
         ]
 
     def resize(self):
+        """
+        Resizes the size of Fuel Tank parts.
+        :return: 
+        """
         self.arr[0].entity.texture = pygame.transform.scale(self.arr[0].image, (60, 60))
         self.arr[1].entity.texture = pygame.transform.scale(self.arr[1].image, (80, 40))
         self.arr[2].entity.texture = pygame.transform.scale(self.arr[2].image, (60, 90))
@@ -193,6 +206,10 @@ class Engines(Parts):
                     ]
 
     def resize(self):
+        """
+        Resizes the size of Engine parts.
+        :return: 
+        """
         self.arr[0].entity.texture = pygame.transform.scale(self.arr[0].image, (40, 60))
         self.arr[1].entity.texture = pygame.transform.scale(self.arr[1].image, (60, 90))
         self.arr[2].entity.texture = pygame.transform.scale(self.arr[2].image, (80, 120))
@@ -223,8 +240,46 @@ def upload_text(arr, mouse_pos, screen):
         part.update(screen)
 
 
-def sandbox(SCREEN, flag, width, height, rocket, events):
-    SCREEN.blit(BG, (0, 0))
+def music_buttons_control(events, text_array):
+    """
+    The function plays, pauses, or continues to play music if corresponding button is clicked.
+    :param events:
+    :param text_array:
+    :return:
+    """
+    menu_mouse_pos = pygame.mouse.get_pos()
+
+    play_music_button, pause_music_button = text_array[3], text_array[4]
+
+    for event in events:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if play_music_button.check_for_input(menu_mouse_pos):
+                pygame.mixer.music.stop()
+                if pygame.mixer.music.get_busy() is False:
+                    pygame.mixer.music.load(playlist[random.randint(0, 6)])
+                    pygame.mixer.music.play(loops=0)
+            if pause_music_button.check_for_input(menu_mouse_pos):
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
+
+
+def gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_array):
+    """
+     The function performs the exact game actions when corresponding button is clicked.
+    :param SCREEN:
+    :param flag:
+    :param width:
+    :param height:
+    :param rocket:
+    :param events:
+    :param text_array:
+    :return:
+    """
 
     menu_mouse_pos = pygame.mouse.get_pos()
 
@@ -232,28 +287,10 @@ def sandbox(SCREEN, flag, width, height, rocket, events):
     capsule = Cabin(SCREEN, width, height, rocket=rocket)
     tanks = Tanks(SCREEN, width, height, rocket=rocket)
     engines = Engines(SCREEN, width, height, rocket=rocket)
-
     parts_array = [capsule, tanks, engines, create_rocket]
     upload_parts(parts_array)
 
-    play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
-                             pos=(width - 100, height - 100), text_input="PLAY")
-    restart_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
-        pos=(width - 100, height - 150), text_input="RESTART")
-    back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
-                             pos=(width - 100, height - 50), text_input="BACK")
-    play_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
-        pos=(width - 225, 50), text_input="Play Random Song")
-    pause_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
-        pos=(width - 225, 100), text_input="Pause/Continue")
-
-    text_array = [play_button, restart_button, back_button, play_music_button, pause_music_button]
-
-    upload_text(text_array, menu_mouse_pos, SCREEN)
-
+    play_button, restart_button, back_button = text_array[0], text_array[1], text_array[2]
 
     for event in events:
         if event.type == pygame.QUIT:
@@ -272,18 +309,54 @@ def sandbox(SCREEN, flag, width, height, rocket, events):
                 for part in segments.arr:
                     if part.check_for_input(menu_mouse_pos):
                         rocket.add_part(part.entity)
-            if play_music_button.check_for_input(menu_mouse_pos):
-                pygame.mixer.music.stop()
-                if pygame.mixer.music.get_busy() is False:
-                    pygame.mixer.music.load(playlist[random.randint(0, 6)])
-                    pygame.mixer.music.play(loops=0)
-            if pause_music_button.check_for_input(menu_mouse_pos):
-                if pygame.mixer.music.get_busy():
-                    pygame.mixer.music.pause()
-                else:
-                    pygame.mixer.music.unpause()
+
+    return flag
 
 
+def text_buttons_define(width, height):
+    """
+    Defines and creates 5 buttons: 3 for gameplay, 2 for playing music
+    :param width: 
+    :param height: 
+    :return: 
+    """
+    play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+                             pos=(width - 100, height - 100), text_input="PLAY")
+    restart_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+        pos=(width - 100, height - 150), text_input="RESTART")
+    back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+                             pos=(width - 100, height - 50), text_input="BACK")
+    play_music_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
+        pos=(width - 225, 50), text_input="Play Random Song")
+    pause_music_button = ButtonText(
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
+        pos=(width - 225, 100), text_input="Pause/Continue")
+
+    return [play_button, restart_button, back_button, play_music_button, pause_music_button]
+
+
+def sandbox(SCREEN, flag, width, height, rocket, events):
+    """
+    The main function of sandbox_menu.py
+    :param SCREEN:
+    :param flag:
+    :param width:
+    :param height:
+    :param rocket:
+    :param events:
+    :return:
+    """
+    SCREEN.blit(BG, (0, 0))
+
+    menu_mouse_pos = pygame.mouse.get_pos()
+
+    text_array = text_buttons_define(width, height)  # FIXME: Миша так можно?
+    upload_text(text_array, menu_mouse_pos, SCREEN)
+
+    flag = gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_array)
+    music_buttons_control(events, text_array)
 
     rocket.recount()
     rocket.draw()
