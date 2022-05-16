@@ -9,15 +9,13 @@ import trajectory_calculation
 
 class Rocket:
     """
-    Класс ракеты. Идея состоит в том, что ракета представляет собой виртуальный холст
-    с нарисованными деталями в нужном порядке, который подаётся в основную программу
-    и уже там с ним производятся манипуляции в виде сжатия, поворота и т п
+    Rocket class. Has an aray of parts, physical engine and a canvas, which as a drawn rocket on it
     """
 
     def __init__(self):
         """
-        Конструктор ракеты
-        инициализирует поля, являющиеся характеристиками холста ракеты и для подсчёта траектории
+        constructor
+        initializes characteristics
         """
         self.width = 100
         self.height = 800
@@ -29,20 +27,20 @@ class Rocket:
 
     def activate_stage(self):
         """
-        перерассчитывает текущие параметры ракеты (ступени)
+        recounts rocket parameters
         """
         self.physics_engine = trajectory_calculation.PhysicsEngine(5, *self.get_active_parameters())
 
     def activate_all(self):
         """
-        Активирует все составляющие ракеты
+        activates all rocket parts
         """
         for part in self.parts:
             part.active = True
 
     def get_active_parameters(self):
         """
-        Функция возвращает параметры ракеты в текущий момент как сумму соответствующих параметров деталей
+        returns characteristics of the rocket as a sum of the part's characteristics
         """
         initial_mass = 0
         exhaust_speed = 0
@@ -65,8 +63,8 @@ class Rocket:
     ###################
     def add_part(self, part_entity):
         """
-        Добавление детали в ракету
-        part_entity - объкт классаа Entity
+        adding part to the rocket
+        part_entity - Entity class object
         """
         part_entity.surface = self.surface
         self.parts.append(part_entity)
@@ -74,10 +72,9 @@ class Rocket:
 
     def recount(self):
         """
-        Эта функция двигает составляющие ракеты так, чтобы ракета касалась верха окна и левой его стенки
-        выстраивает все части ракеты в правильном порядке: сверху вниз:
-        капсула, баки и двигатель
-        Вот это надо делать всегда после изменения составляющих ракеты
+        This function builds rocket from it's parts array.
+        It makes rocket parts to follow the order from up to down:
+        capsule, fueltanks, engine
         """
         fuel_tanks_y = [0]
         cabin_height = 0
@@ -100,13 +97,13 @@ class Rocket:
 
     def get_surface(self):
         """
-        Просто возвращает холст с ракетой
+        returns canvas with the drawn rocket on it
         """
         return self.surface
 
     def draw(self):
         """
-        Просто отрисовывает все составляющие ракеты на её экране
+        draws rocket on it's canvas
         """
         for part_entity in self.parts:
             part_entity.draw()
@@ -114,8 +111,8 @@ class Rocket:
 
 def load_rocket(sourcefile):
     """
-    Читает составляющие ракеты из файла, строит ракету и возвращает готовый объект
-    sourcefile - Путь к файлу, где записана ракета
+    loads rocket from the file
+    sourcefile - path to the file with rocket
     """
     rocket_entity = Rocket()
     with open(sourcefile, "r") as f:
@@ -138,9 +135,9 @@ def load_rocket(sourcefile):
 
 def save_rocket(rocket_entity, outfile):
     """
-    Сохраняет ракету в файл
-    rocket_entity - объект класса Rocket
-    outfile - путь к файлу сохранения
+    saves the rocket to the file
+    rocket_entity - Rocket class object
+    outfile - path to the file
     """
     with open(outfile, "w") as file:
         for part_entity in rocket_entity.parts:

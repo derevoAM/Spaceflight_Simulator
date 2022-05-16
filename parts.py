@@ -3,19 +3,19 @@ import pygame
 
 class Entity:
     """
-    Просто класс, объект которого будет статично отрисован на ракете
-    Умеет отрисовывать себя на экране ракеты.
+    Just a class whose object will be statically drawn on the rocket
+    Can draw itself on the screen of the rocket.
     """
 
     def __init__(self, surface, x=0, y=0, size=1, mass=0):
         """
-        конструктор класса объекта детали
-        surface - объект класса pygame.surface
-        x, y - координаты левого верхнего угла изображения на экране.
-        size - размер детали(на будущее, маленький, большой или средний)
-        mass = масса детали
-        имеет поля текстуры (путь к файлу, где хранится изображение) и активности
-        (показывает программе, работает ли сейчас данный компонент)
+        part object class constructor
+        surface - object of class pygame.surface
+        x, y - coordinates of the upper left corner of the image on the screen.
+        size - size of the part (for future, small, large or medium)
+        mass = mass of the pattern
+        has texture (path to the file where the image is stored) and activity fields
+        (shows the program whether the component is currently working)
         """
         self.surface = surface
         self.x = x
@@ -27,23 +27,23 @@ class Entity:
 
     def draw(self):
         """
-        Рисует себя просто вклеиванием прямоугольника текстуры в нужное место холста ракеты
+        Draws itself simply by pasting a rectangle of texture into the right place of the rocket's canvas
         """
         self.surface.blit(self.texture, dest=[self.x, self.y])
 
 
 class Engine(Entity):
     """
-    Класс ракетного двигателя
+    Rocket engine class
     """
 
     def __init__(self, surface, power=0, consumption=0, x=0, y=0, mass=0):
         """
-        Здесь уже имеются поля
-        consumption - потребление топлива
-        power - выходная мощность при максимальном потреблении горючего
-        output - процентная доля текущей мощности от выходной
-        тут в поле текстуры уже стоит определённый путь к файлу, а в поле типа - тип.
+        Here we already have the following fields
+        consumption - fuel consumption
+        power - output power at maximum fuel consumption
+        output - percentage of current power from output power
+        In the texture field there is a certain path to the file, and in the type field - type.
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.power = power
@@ -55,15 +55,15 @@ class Engine(Entity):
 
 class FuelTank(Entity):
     """
-    Класс топливного бака
+    Fuel tank class
     """
 
     def __init__(self, surface, capacity=0, x=0, y=0, mass=0):
         """
-        Здесь уже имеются поля
-        capacity - вместимость бака
-        fullness - процентная доля текущего количества топлива от полного
-        тут в поле текстуры уже стоит определённый путь к файлу, а в поле типа - тип.
+        Here we already have the following fields
+        capacity - tank capacity
+        fullness - percentage of current fuel amount from full
+        In the texture field there is a certain path to the file, and in the type field - type.
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.capacity = capacity
@@ -73,12 +73,12 @@ class FuelTank(Entity):
 
 class Cabin(Entity):
     """
-    класс кабины
+    cabin class
     """
 
     def __init__(self, surface, x=0, y=0, mass=0):
         """
-        здесь прописан путь к текстуре и тип.
+        Here is the path to the texture and the type.
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.type = "cabin"
