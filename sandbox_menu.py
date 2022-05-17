@@ -1,7 +1,9 @@
-import pygame
-import sys
-import parts
 import random
+import sys
+
+import pygame
+
+import parts
 
 BG = pygame.image.load("textures/sandbox_menu/sandbox_back.png")
 
