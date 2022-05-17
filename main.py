@@ -1,5 +1,5 @@
 import sandbox_menu
-import sandbox
+import rocket
 import main_menu
 import draw_screen
 import pygame
