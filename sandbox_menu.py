@@ -313,9 +313,8 @@ def upload_text(arr, mouse_pos, screen):
 def music_buttons_control(events, text_array):
     """
     The function plays, pauses, or continues to play music if corresponding button is clicked.
-    :param events:
-    :param text_array:
-    :return:
+    :param events: events
+    :param text_array: text buttons
     """
     menu_mouse_pos = pygame.mouse.get_pos()
 
@@ -338,21 +337,33 @@ def music_buttons_control(events, text_array):
                     pygame.mixer.music.unpause()
 
 
-def gameplay_check_events(screen, events, mouse_pos, text, rocket, parts_arr, part_choose, flag):
+def gameplay_check_events(screen, events, mouse_pos, text, rocket, parts_arr, part_choose, menu):
+    """
+    Analyzing whether part button was clicked on and change the state
+    :param screen: screen
+    :param events: events
+    :param mouse_pos: mouse position
+    :param text: type of a part
+    :param rocket: object of class Rocket from sandbox
+    :param parts_arr: array of displayed parts
+    :param part_choose: array of a part of a rocket, which is being selected in this particular moment, and its width
+    :param menu: type of menu: main menu, sandbox menu, play menu
+    :return: menu, part_choose, rocket
+    """
     for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if text[0].check_for_input(mouse_pos):
-                flag = "play menu"
+                menu = "play menu"
                 screen.fill((0, 0, 0, 0))
             if text[1].check_for_input(mouse_pos):
                 part_choose = ["engine", 0]
                 rocket.parts.clear()
                 rocket.surface = pygame.Surface([rocket.width, rocket.height], pygame.SRCALPHA)
             if text[2].check_for_input(mouse_pos):
-                flag = "main menu"
+                menu = "main menu"
             for segments in parts_arr:
                 for part in segments.arr:
                     if part.check_for_input(mouse_pos) and (
@@ -365,20 +376,21 @@ def gameplay_check_events(screen, events, mouse_pos, text, rocket, parts_arr, pa
                                 part_choose[0] = "fuel tank"
                         rocket.add_part(part.entity)
 
-    return flag, part_choose, rocket
+    return menu, part_choose, rocket
 
 
-def gameplay_buttons_control(screen, flag, width, height, rocket, events, text_array, part_choose):
+def gameplay_buttons_control(screen, menu, width, height, rocket, events, text_array, part_choose):
     """
      The function performs the exact game actions when corresponding button is clicked.
-    :param screen:
-    :param flag:
-    :param width:
-    :param height:
-    :param rocket:
-    :param events:
-    :param text_array:
-    :param part_choose:
+    :param screen: screen
+    :param menu: type of menu: main menu, sandbox menu, play menu
+    :param width: screen width
+    :param height: screen height
+    :param rocket: object of class Rocket from sandbox
+    :param events: events
+    :param text_array: array of text buttons
+    :param part_choose: array of a part of a rocket, which is being selected in this particular moment, and its width
+    :return: menu, part_choose
     """
 
     menu_mouse_pos = pygame.mouse.get_pos()
@@ -398,16 +410,17 @@ def gameplay_buttons_control(screen, flag, width, height, rocket, events, text_a
 
     upload_parts(parts_array, part_choose[1])
 
-    flag, part_choose, rocket = gameplay_check_events(screen, events, menu_mouse_pos, text_array, rocket, parts_array, part_choose, flag)
+    menu, part_choose, rocket = gameplay_check_events(screen, events, menu_mouse_pos, text_array, rocket, parts_array,
+                                                      part_choose, menu)
 
-    return flag, part_choose
+    return menu, part_choose
 
 
 def text_buttons_define(width, height):
     """
     Defines and creates 5 buttons: 3 for gameplay, 2 for playing music
-    :param width: 
-    :param height:
+    :param width: screen width
+    :param height: screen height
     """
     play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 100), text_input="PLAY")
@@ -426,27 +439,28 @@ def text_buttons_define(width, height):
     return [play_button, restart_button, back_button, play_music_button, pause_music_button]
 
 
-def sandbox(SCREEN, flag, width, height, rocket, events, part_choose):
+def sandbox(screen, menu, width, height, rocket, events, part_choose):
     """
     The main function of sandbox_menu.py
-    :param SCREEN:
-    :param flag:
-    :param width:
-    :param height:
-    :param rocket:
-    :param events:
+    :param screen: screen
+    :param menu: type of menu: main menu, sandbox menu, play menu
+    :param width: screen width
+    :param height: screen height
+    :param rocket: object of class Rocket from sandbox
+    :param events: events
     :param part_choose:  part of a rocket, which is being selected in this particular moment, with the size of a texture
+    :return: menu, rocket, part_choose
     """
-    SCREEN.blit(BG, (0, 0))
+    screen.blit(BG, (0, 0))
 
     menu_mouse_pos = pygame.mouse.get_pos()
 
     text_array = text_buttons_define(width, height)
-    upload_text(text_array, menu_mouse_pos, SCREEN)
+    upload_text(text_array, menu_mouse_pos, screen)
 
-    flag, part_choose = gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_array, part_choose)
+    menu, part_choose = gameplay_buttons_control(screen, menu, width, height, rocket, events, text_array, part_choose)
     music_buttons_control(events, text_array)
 
     rocket.recount()
-    SCREEN.blit(rocket.surface, (width / 2, 200))
-    return flag, rocket, part_choose
+    screen.blit(rocket.surface, (width / 2, 200))
+    return menu, rocket, part_choose
