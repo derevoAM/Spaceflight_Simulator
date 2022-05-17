@@ -2,7 +2,7 @@
 import pygame
 # import trajectory_calculation as tr
 import rocket_view as r_v
-import rocket as s_b
+import sandbox as s_b
 
 SKY = [0, 42, 255]
 GREEN = [0, 255, 0]

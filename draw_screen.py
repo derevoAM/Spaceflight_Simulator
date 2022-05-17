@@ -201,7 +201,7 @@ class SpaceView(View):
         """
         Drawing predicative orbit
         """
-        for current in self.engine.rocket_parameters.predicative_orbit:
+        for current in self.engine.rocket_parameters.predictive_orbit:
             pygame.draw.circle(self.surface, WHITE,
                                (self.scale * current[0] + self.width / 2, -self.scale * current[1] + self.height / 2),
                                1)

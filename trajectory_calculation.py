@@ -43,7 +43,7 @@ class RocketParameters:
         self.parameters = np.array(initial_parameters)
         self.direction = np.array([1, 0])
         self.current_time = 0.0
-        self.predicative_orbit = np.ndarray(shape=(0, 4), dtype=float)
+        self.predictive_orbit = np.ndarray(shape=(0, 4), dtype=float)
 
         self.current_stage_mass = initial_rocket_mass
         self.fuel_remained = tanks_fullness
@@ -262,7 +262,7 @@ class PhysicsEngine:
                                                                                time_array[count - 1])
 
         predicative_orbit = np.resize(predicative_orbit, (count, 4))
-        self.rocket_parameters.predicative_orbit = predicative_orbit
+        self.rocket_parameters.predictive_orbit = predicative_orbit
 
     def process_step(self):
         """
