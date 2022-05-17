@@ -14,7 +14,7 @@ class Entity:
         x, y - coordinates of the upper left corner of the image on the screen.
         size - size of the part (for future, small, large or medium)
         mass = mass of the pattern
-        has texture (path to the file where the image is stored) and activity fields
+        has activity fields
         (shows the program whether the component is currently working)
         """
         self.surface = surface
@@ -43,7 +43,7 @@ class Engine(Entity):
         consumption - fuel consumption
         power - output power at maximum fuel consumption
         output - percentage of current power from output power
-        In the texture field there is a certain path to the file, and in the type field - type.
+        In the type field - type.
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.power = power
@@ -63,7 +63,7 @@ class FuelTank(Entity):
         Here we already have the following fields
         capacity - tank capacity
         fullness - percentage of current fuel amount from full
-        In the texture field there is a certain path to the file, and in the type field - type.
+        In the type field - type.
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.capacity = capacity
@@ -78,7 +78,7 @@ class Cabin(Entity):
 
     def __init__(self, surface, x=0, y=0, mass=0):
         """
-        Here is the path to the texture and the type.
+        Here is the type.
         """
         Entity.__init__(self, surface, x=x, y=y, mass=mass)
         self.type = "cabin"
