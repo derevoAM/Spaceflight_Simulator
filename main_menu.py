@@ -1,6 +1,6 @@
 import pygame
 import sys
-#import cv2
+import cv2
 
 BG = pygame.image.load("Textures/menu/background.png")
 """Uploads background picture"""
