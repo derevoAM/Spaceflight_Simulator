@@ -1,5 +1,5 @@
 import sandbox_menu
-import rocket
+import sandbox
 import main_menu
 import draw_screen
 import pygame
@@ -17,7 +17,7 @@ window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.update()
 window_width, window_height = pygame.display.get_surface().get_size()
 
-rocket = rocket.Rocket()
+rocket = sandbox.Rocket()
 
 Rocket_surface = draw_screen.RocketView(window_width, window_height, rocket)
 Space_surface = draw_screen.SpaceView(window_width, window_height, rocket)
@@ -75,6 +75,7 @@ def play_menu(obj, engine, start):
 
     if start == 1:
         engine.process_step()
+
     draw_everything(engine)
 
     return obj, engine
@@ -141,7 +142,7 @@ def rocket_power(eve, power):
     return power
 
 
-def displaying_menu(menu, part_type, obj, engine, start, turn, power, eve):
+def displaying_menu(menu, part_type, obj, engine, start, turn, power, eve, finish):
     """
     Function, which is responsible for everything related to menus
     :param menu: type of menu: main menu, sandbox menu, play menu
@@ -152,16 +153,20 @@ def displaying_menu(menu, part_type, obj, engine, start, turn, power, eve):
     :param turn: flag that shows whether right or left arrow was pressed
     :param power: flag that shows whether Shift(increase speed) or CTRL(reduce speed) was pressed
     :param eve: events
-    :return: menu, part_type, obj, engine, start, turn, power
+    :param finish: finished flag
+    :return: menu, part_type, obj, engine, start, turn, power, finish
     """
     menu, part_type = menu_type(menu, obj, part_type)
 
     if menu == "play menu":
         obj, engine = play_menu(obj, engine, start)
-        turn, engine = rocket_direction(eve, turn, engine)
-        power = rocket_power(eve, power)
+        if engine.rocket_parameters.collision_flag:
+            finish = True
+        else:
+            turn, engine = rocket_direction(eve, turn, engine)
+            power = rocket_power(eve, power)
 
-    return menu, part_type, obj, engine, start, turn, power
+    return menu, part_type, obj, engine, start, turn, power, finish
 
 
 while not finished:
@@ -170,12 +175,12 @@ while not finished:
 
     events = pygame.event.get()
 
-    flag_menu, part_size, rocket, rocket_engine, flag_start, flag_turn, flag_power = displaying_menu(flag_menu,
+    flag_menu, part_size, rocket, rocket_engine, flag_start, flag_turn, flag_power, finished = displaying_menu(flag_menu,
                                                                                                      part_size, rocket,
                                                                                                      rocket_engine,
                                                                                                      flag_start,
                                                                                                      flag_turn,
-                                                                                                     flag_power, events)
+                                                                                                     flag_power, events, finished)
 
     for event in events:
         if event.type == pygame.QUIT:
