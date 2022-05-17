@@ -1,5 +1,6 @@
 import pygame
 import sys
+import cv2
 
 pygame.init()
 
@@ -45,13 +46,18 @@ class Button:
         screen.blit(self.text, self.text_rect)
 
     def check_for_input(self, position):
+
         return position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
                                                                                               self.rect.bottom)
 
     def change_color(self, position):
         """
         Changes the color of button text when the mouse is on a button.
+
+        :param: position
+        :return:
         """
+
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
                                                                                           self.rect.bottom):
             self.text = self.font.render(self.text_input, True, self.hovering_color)
@@ -59,13 +65,49 @@ class Button:
             self.text = self.font.render(self.text_input, True, self.base_color)
 
 
-def get_font(size):  # Returns Press-Start-2P in the desired size
+def get_font(size):
+    """
+    Returns font with exact size
+    :param size:
+    :return: pygame.font.Font("Textures/menu/font.ttf", size)
+    """
     return pygame.font.Font("Textures/menu/font.ttf", size)
+
+
+def play_video():
+    """
+    When CREDITS is clicked plays video.
+    :return none:
+    """
+    file_name = "Textures/credits/sw-3000.mp4"
+    window_name = "window"
+    inter_frame_wait_ms = 15
+
+    video = cv2.VideoCapture(file_name)
+    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+    while True:
+        ret, frame = video.read()
+        if not ret:
+            print("Reached end of video, exiting.")
+            break
+
+        cv2.imshow(window_name, frame)
+        if cv2.waitKey(inter_frame_wait_ms) & 0x7F == ord('q'):
+            print("Exit requested.")
+            break
+
+    video.release()
+    cv2.destroyAllWindows()
 
 
 def main_menu(SCREEN, flag):
     """
     Main function of main_menu.py.
+    :param SCREEN:
+    :param flag:
+    :return:
     """
     SCREEN.blit(BG, (0, 0))
 
@@ -77,16 +119,16 @@ def main_menu(SCREEN, flag):
     PLAY_BUTTON = Button(image=pygame.image.load("Textures/menu/Play Rect.png"),
                          pos=(960 * coefficient_w, 375 * coefficient_h),
                          text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-    OPTIONS_BUTTON = Button(image=pygame.image.load("Textures/menu/Options Rect.png"),
+    CREDITS_BUTTON = Button(image=pygame.image.load("Textures/menu/Options Rect.png"),
                             pos=(960 * coefficient_w, 600 * coefficient_h),
-                            text_input="OPTIONS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+                            text_input="CREDITS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
     QUIT_BUTTON = Button(image=pygame.image.load("Textures/menu/Quit Rect.png"),
                          pos=(960 * coefficient_w, 825 * coefficient_h),
                          text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
 
     SCREEN.blit(MENU_TEXT, MENU_RECT)
 
-    for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
+    for button in [PLAY_BUTTON, CREDITS_BUTTON, QUIT_BUTTON]:
         button.change_color(MENU_MOUSE_POS)
         button.update(SCREEN)
 
@@ -99,9 +141,11 @@ def main_menu(SCREEN, flag):
                 pygame.mixer.music.stop()
                 flag = "sandbox menu"
                 SCREEN.fill((0, 0, 0, 0))
-            if OPTIONS_BUTTON.check_for_input(MENU_MOUSE_POS):
-                pygame.quit()
-                sys.exit()
+            if CREDITS_BUTTON.check_for_input(MENU_MOUSE_POS):
+                pygame.mixer.music.load("Textures/music/credits.mp3")
+                pygame.mixer.music.play(loops=0)
+                play_video()
+                pygame.mixer.music.stop()
             if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                 pygame.quit()
                 sys.exit()
