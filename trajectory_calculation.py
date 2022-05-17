@@ -1,6 +1,5 @@
 # Calculating the trajectory of a rocket
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -10,21 +9,24 @@ class Constants:
     """
 
     def __init__(self, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, initial_mass):
-        self.height_max = 9000  # высота в метрах, на которой плотность воздуха падает в е раз
-        self.rho_max = 1.2  # плотность воздуха на высоте уровня моря
-        self.area = 2.  # площадь КА
-        self.C_coefficient = 0.4  # коэффициент аэродинамического сопротивления
-        self.rad_Earth = 6.37e6  # радиус Земли (средний)
+        """
+        Initializing constants class
+        :param gas_exhaust_speed: engine characteristic
+        :param fuel_consumption: engine characteristic
+        :param fuel_tank_capacity: overall tanks capacity
+        :param initial_mass: initial rocket mass
+        """
+        self.rad_Earth = 6.37e6
         self.rad_Moon = 1.74e6
-        self.mu_Earth = 4e14  # гравитационный параметр Земли
-        self.mu_moon = 4.91e12  # гравитационный параметр Луны (гравитационная постоянная * масса)
-        self.moon_rad = 3.85e8  # радиус орбиты Луны
-        self.moon_period = 27.3 * 24 * 3600 / 2 / np.pi  # период обращения Луны вокруг Земли в с/рад
-        self.initial_fas = 99 / 180 * np.pi  # начальная фаза Луны (которую нужно подогнать)
+        self.mu_Earth = 4e14
+        self.mu_moon = 4.91e12
+        self.moon_rad = 3.85e8
+        self.moon_period = 27.3 * 24 * 3600 / 2 / np.pi
+        self.initial_fas = 99 / 180 * np.pi
         self.log_size = 500
 
-        self.gas_exhaust_speed = gas_exhaust_speed  # скорость истечения топлива
-        self.fuel_consumption = fuel_consumption  # расход топлива
+        self.gas_exhaust_speed = gas_exhaust_speed
+        self.fuel_consumption = fuel_consumption
         self.fuel_tank_capacity = fuel_tank_capacity
         self.initial_mass = initial_mass
 
@@ -33,37 +35,60 @@ class Constants:
 
 class RocketParameters:
 
-    def __init__(self, initial_parameters, initial_rocket_mass, fuel):
+    def __init__(self, initial_parameters, initial_rocket_mass, tanks_fullness):
+        """
+        Initializing RocketParameters class
+        :param initial_parameters: [x, y, vx, vy] array, consisting of initial rocket coordinates and velocity
+        :param initial_rocket_mass: initial rocket mass
+        :param tanks_fullness: mass of fuel stored in tanks
+        """
         self.parameters = np.array(initial_parameters)
         self.direction = np.array([1, 0])
         self.current_time = 0.0
         self.predicative_orbit = np.ndarray(shape=(0, 4), dtype=float)
 
         self.current_stage_mass = initial_rocket_mass  # масса ступени текущая
-        self.fuel_remained = fuel
+        self.fuel_remained = tanks_fullness
         self.engine_power = 1.0
 
         self.engine_is_on_flag = True
         self.collision_flag = False
 
     def is_empty(self):
+        """
+        :return: true if no fuel is available, otherwise false
+        """
         return self.fuel_remained <= 0
 
 
 class PhysicsEngine:
 
-    def __init__(self, initial_rocket_mass, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, fuel,
+    def __init__(self, initial_rocket_mass, gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, tanks_fullness,
                  initial_parameters):
+        """
+        Initializing PhysicsEngine class
+        :param initial_rocket_mass: initial rocket mass
+        :param gas_exhaust_speed: engine characteristic
+        :param fuel_consumption: engine characteristic
+        :param fuel_tank_capacity: overall tanks capacity
+        :param tanks_fullness: mass of fuel stored in tanks
+        :param initial_parameters: [x, y, vx, vy] array, consisting of initial rocket coordinates and velocity
+        """
         self.constants = Constants(gas_exhaust_speed, fuel_consumption, fuel_tank_capacity, initial_rocket_mass)
-        self.rocket_parameters = RocketParameters(initial_parameters, initial_rocket_mass, fuel)
+        self.rocket_parameters = RocketParameters(initial_parameters, initial_rocket_mass, tanks_fullness)
 
     def set_predicative_orbit_log_size(self, new_size):
+        """
+        Function to set the number of predicative points to be calculated on each step
+        :param new_size: number of points
+        """
         self.constants.log_size = new_size
 
-    def set_parameters(self, new_parameters):
-        self.rocket_parameters.parameters = new_parameters
-
     def set_rocket_direction(self, angle):
+        """
+        Function to update rocket_direction, creates directional vector of length 1
+        :param angle: new rocket angle in radians (zero angle is Ox axis, increasing counterclockwise)
+        """
         self.rocket_parameters.direction = np.array([np.cos(angle), np.sin(angle)])
 
     def turn_rocket(self, angle):
@@ -77,31 +102,35 @@ class PhysicsEngine:
         self.rocket_parameters.direction = np.dot(rotation_matrix, self.rocket_parameters.direction)
 
     def reduce_mass(self):
+        """
+        Function to reduce rocket mass on each step.
+        :return:
+        """
+
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
-            self.rocket_parameters.fuel_remained -= self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
-            self.rocket_parameters.current_stage_mass -= self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
+            self.rocket_parameters.fuel_remained -= self.rocket_parameters.engine_power * self.constants.step * \
+                                                    self.constants.fuel_consumption
+            self.rocket_parameters.current_stage_mass -= \
+                self.rocket_parameters.engine_power * self.constants.step * self.constants.fuel_consumption
 
         if self.rocket_parameters.fuel_remained <= 0:
             self.rocket_parameters.fuel_remained = 0
 
     def switch_engine(self, flag, power=1.0):
+        """
+        Function to switch engine on/off and change it's power
+        :param flag: true if engine is working, otherwise false
+        :param power: power coefficient, default is 1
+        """
         self.rocket_parameters.engine_is_on_flag = flag
         self.rocket_parameters.engine_power = power
 
     def detect_collision(self):
         """
-        Function to detect collision with Earth and Moon
+        Function to detect collision with Earth
         """
         if np.linalg.norm(self.rocket_parameters.parameters[:2]) < self.constants.rad_Earth:
             self.rocket_parameters.collision_flag = True
-
-    def calc_rho(self, position_norm):
-        """
-        Calculating atmosphere rho
-        :param position_norm: height above the sea level
-        :return: rho
-        """
-        return self.constants.rho_max * np.exp(-position_norm / self.constants.height_max)
 
     def calc_moon_position(self, time):
         """
@@ -112,23 +141,6 @@ class PhysicsEngine:
         return self.constants.moon_rad * np.array(
             [np.cos(self.constants.initial_fas + time / self.constants.moon_period),
              np.sin(self.constants.initial_fas + time / self.constants.moon_period)])
-
-    def calc_acceleration_air(self, parameters, position_norm, velocity_norm):
-        """
-        Calculating air impact
-        :param parameters: [x, y, vx, vy] array consisting of rocket stage parameters
-        :param position_norm: the norm of vector earth-rocket
-        :param velocity_norm: the norm of rocket speed
-        :return: [ax, ay] array consisting of acceleration values for each axis
-        """
-        return np.zeros(2)
-
-    """ if position_norm - self.constants.rad_Earth < 10 * self.constants.height_max:
-         return - 0.5 * self.constants.C_coefficient * self.calc_rho(
-             position_norm - self.constants.rad_Earth) * self.constants.area * velocity_norm \
-                * parameters[2:] / self.rocket_parameters.current_stage_mass
-     else:
-         return np.zeros(2)"""
 
     def calc_acceleration_earth(self, parameters, position_norm):
         """
@@ -145,8 +157,10 @@ class PhysicsEngine:
         :return: [ax, ay] array consisting of acceleration values for each axis
         """
         if self.rocket_parameters.engine_is_on_flag and not self.rocket_parameters.is_empty():
-            return self.rocket_parameters.engine_power * self.constants.fuel_consumption * self.constants.gas_exhaust_speed / self.rocket_parameters.current_stage_mass \
-                   * self.rocket_parameters.direction
+            return self.rocket_parameters.engine_power * \
+                   self.constants.fuel_consumption * self.constants.gas_exhaust_speed / \
+                   self.rocket_parameters.current_stage_mass * \
+                   self.rocket_parameters.direction
 
         else:
             return np.zeros(2)
@@ -170,9 +184,6 @@ class PhysicsEngine:
         :return: [ax, ay] array consisting of acceleration values for each axis
         """
         position_norm = np.linalg.norm(parameters[:2])
-        velocity_norm = np.linalg.norm(parameters[2:])
-
-        acceleration_air = self.calc_acceleration_air(parameters, position_norm, velocity_norm)
 
         acceleration_gravity = self.calc_acceleration_earth(parameters, position_norm)
 
@@ -180,7 +191,7 @@ class PhysicsEngine:
 
         acceleration_moon = self.calc_acceleration_moon(parameters, time)
 
-        return acceleration_air + acceleration_gravity + acceleration_engine + acceleration_moon
+        return acceleration_gravity + acceleration_engine + acceleration_moon
 
     def calc_differential(self, parameters, time):
         """
@@ -231,8 +242,9 @@ class PhysicsEngine:
         :param time: time used in predicative calculations
         :return: predicative [new_x, new_y, new_vx, new_vy] array
         """
-        return predicative_parameters + self.calc_differential_euler(predicative_parameters,
-                                                                     time) * self.constants.step * 20, time + self.constants.step * 5
+        return \
+            predicative_parameters + self.calc_differential_euler(predicative_parameters, time) * \
+            self.constants.step * 20, time + self.constants.step * 5
 
     def calc_predicative_orbit(self):
         """
@@ -261,52 +273,3 @@ class PhysicsEngine:
         self.calc_step()
         self.calc_predicative_orbit()
         self.detect_collision()
-
-
-if __name__ == "__main__":
-    initial_position = [7e6, 0, 0, 5500]
-    engine = PhysicsEngine(80000, 4000, 300, 50000, 50000, initial_position)
-    # engine.switch_engine(True, 1)
-    engine.switch_engine(True, 1)
-    size = 500000
-
-    position_and_velocity_log = np.ndarray(shape=(size, 4), dtype=float)
-    position_and_velocity_log[0] = engine.rocket_parameters.parameters
-    predicative_orbit_log = np.ndarray(shape=(100, 4), dtype=float)
-    time_log = np.ndarray(shape=(size,), dtype=float)  # текущее время расчета
-    step_time = 5  # шаг расчета
-    counter = 0  # счетчик
-
-    engine.set_rocket_direction(0)
-
-    while counter < 1000 and not engine.rocket_parameters.is_empty():
-        counter += 1
-        engine.process_step()
-        position_and_velocity_log[counter] = engine.rocket_parameters.parameters
-        predicative_orbit_log = engine.rocket_parameters.predicative_orbit
-
-    engine.set_rocket_direction(np.pi / 2)
-    # engine.switch_engine(True, 10)
-    engine.rocket_parameters.fuel_remained = 300000
-    while counter < 1000 and not engine.rocket_parameters.collision_flag and not engine.rocket_parameters.is_empty():
-        counter += 1
-        engine.process_step()
-        position_and_velocity_log[counter] = engine.rocket_parameters.parameters
-        predicative_orbit_log = engine.rocket_parameters.predicative_orbit
-
-    fig, ax = plt.subplots()
-    print(predicative_orbit_log)
-
-    plt.axis('equal')
-    ax.add_patch(plt.Circle((0, 0), engine.constants.rad_Earth))
-    ax.plot(position_and_velocity_log[:counter, 0], position_and_velocity_log[:counter, 1], color="black", linewidth=1)
-    ax.plot(predicative_orbit_log[::, 0], predicative_orbit_log[::, 1])
-
-    plt.show()
-
-"""
-    first_stage = Stage([80000, 4000, 300, 50000, 50000])  # параметры первой ступени
-    second_stage = Stage([first_stage.current_stage_mass - first_stage.fuel_tank_capacity, 3000, 200, 28000,
-                          28000])  # параметры второй ступени
-    third_stage = Stage([second_stage.current_stage_mass - second_stage.fuel_tank_capacity, 265, 50, 1995,
-                         1995])  # параметры третьей ступени"""
