@@ -148,7 +148,7 @@ def credits_menu(screen):
 
 def main_menu(screen, menu):
     """
-    Main function of main_menu.py.
+    Main function of main_menu.py
     :param screen: screen
     :param menu: type of menu: main menu, sandbox menu, play menu
     :return: menu - shows the type of next menu
