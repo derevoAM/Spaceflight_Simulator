@@ -70,7 +70,6 @@ class RocketView(View):
         self.surface.fill((0, 0, 0, 0))
         self.surface.blit(pygame.image.load("Textures/View_background/stars.jpg"), (0, 0))
         self.rocket.recount()
-        self.rocket.draw()
         pygame.draw.line(self.surface, BLACK, (self.width / 2, 0), (self.width / 2, self.height))
         h = 0
         for part in self.rocket.parts:

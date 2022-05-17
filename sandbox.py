@@ -18,10 +18,11 @@ class Rocket:
         initializes characteristics
         """
         self.width = 100
-        self.height = 800
-        self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
+        self.surface = pygame.Surface([100, 800], pygame.SRCALPHA)
         self.angle = -90
         self.parts = []
+        self.engine_bottom = 0
+        self.fire_texture = pygame.image.load("textures/fire/fire.png")
 
         self.physics_engine = None
 
@@ -84,13 +85,15 @@ class Rocket:
                 fuel_tanks_y.append(fuel_tanks_y[-1] + part_entity.texture.get_height())
             elif part_entity.type == "cabin":
                 cabin_height = part_entity.texture.get_height()
+                self.width = part_entity.texture.get_width()
         for part_entity in self.parts:
             if part_entity.type == "fueltank":
                 part_entity.y = cabin_height + fuel_tanks_y[part_counter]
                 part_counter += 1
             elif part_entity.type == "engine":
                 part_entity.y = cabin_height + fuel_tanks_y[-1]
-        self.surface = pygame.Surface([self.width, self.height], pygame.SRCALPHA)
+                self.engine_bottom = part_entity.y + part_entity.texture.get_height()
+        self.surface = pygame.Surface([self.width, self.engine_bottom + 200], pygame.SRCALPHA)
         for part_entity in self.parts:
             part_entity.surface = self.surface
             part_entity.draw()
@@ -101,13 +104,18 @@ class Rocket:
         """
         return self.surface
 
-    def draw(self):
+    def draw(self, engine_power):
         """
-        draws rocket on it's canvas
+        draws rocket on it's canvas and adds engine fire
+        engine power - percentage of current power from maximum
         """
+        self.surface = pygame.Surface([self.width, self.engine_bottom + 200], pygame.SRCALPHA)
         for part_entity in self.parts:
+            part_entity.surface = self.surface
             part_entity.draw()
-
+        fire_scaled = pygame.transform.scale(self.fire_texture, [self.width * 2 // 3,
+                                                                 self.fire_texture.get_height() * engine_power / 300])
+        self.surface.blit(fire_scaled, dest = [(self.width // 2) - (fire_scaled.get_width() // 2), self.engine_bottom])
 
 def load_rocket(sourcefile):
     """
@@ -147,7 +155,7 @@ def save_rocket(rocket_entity, outfile):
 ## Тестирую на совместимость!
 
 if __name__ == "__main__":
-    screen = pygame.display.set_mode((900, 900))
+    screen = pygame.display.set_mode((1000, 1000))
     r = Rocket()
     engine1 = p.Engine(0)
     engine1.texture = pygame.image.load("textures/engines/big_engine_100x75.png")
@@ -166,8 +174,8 @@ if __name__ == "__main__":
     r.add_part(capsule)
     screen.blit(r.surface, dest=[400, 0])
     r.recount()
-    screen.blit(r.surface, dest=[0, 0])
-
+    r.draw(50)
+    screen.blit(r.surface, dest=[50, 0])
     pygame.display.update()
     clock = pygame.time.Clock()
     finished = False

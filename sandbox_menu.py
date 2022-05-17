@@ -401,6 +401,5 @@ def sandbox(SCREEN, flag, width, height, rocket, events, part_choose):
     music_buttons_control(events, text_array)
 
     rocket.recount()
-    rocket.draw()
     SCREEN.blit(rocket.surface, (width / 2, 200))
     return flag, rocket, part_choose
