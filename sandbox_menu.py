@@ -14,7 +14,16 @@ playlist = [
     "Textures/music/Boyfriend.mp3",
     "Textures/music/My_Way.mp3",
     "Textures/music/Stop.mp3",
-]  # FIXME DO we need comments in here?
+]
+
+
+def get_font(size):  # Returns Press-Start-2P in the desired size
+    """
+    Returns
+    :param size: font size
+    :return:
+    """
+    return pygame.font.Font("Textures/menu/font.ttf", size)
 
 
 class Button:
@@ -23,6 +32,11 @@ class Button:
     """
 
     def __init__(self, image, pos):
+        """
+        Initializing a button
+        :param image: image
+        :param pos: position on the screen
+        """
         self.image = image
         self.x_pos = pos[0]
         self.y_pos = pos[1]
@@ -32,7 +46,6 @@ class Button:
         """
         Drawing object on screen
         :param screen: screen itself
-        :return:
         """
         pass
 
@@ -40,7 +53,7 @@ class Button:
         """
         Checking whether an image(text or part of a rocket) was clicked on
         :param position: position of a mouse click
-        :return:
+        :return: True, if clicked, false, if not clicked
         """
         return position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
                                                                                               self.rect.bottom)
@@ -53,6 +66,14 @@ class ButtonText(Button):
     """
 
     def __init__(self, image, pos, text_input="", base_color="#d7fcd4", hovering_color="White"):
+        """
+        Initializing text button
+        :param image: image
+        :param pos: position on the screen
+        :param text_input: text itself
+        :param base_color: color
+        :param hovering_color: color, when the mouse is on the button(not necessary clicked_
+        """
         Button.__init__(self, image, pos)
         self.text_input = text_input
         self.font = get_font(25)
@@ -62,13 +83,16 @@ class ButtonText(Button):
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
     def update(self, screen):
+        """
+        Updating text button on the screen
+        :param screen: screen
+        """
         screen.blit(self.text, self.text_rect)
 
     def change_color(self, position):
         """
         Changes the text color of a button if the mouse pointer is located on a button. 
-        :param position: 
-        :return: 
+        :param position: mouse position
         """
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
                                                                                           self.rect.bottom):
@@ -83,21 +107,22 @@ class PartsButton(Button):
     """
 
     def __init__(self, entity, pos, image):
+        """
+        Initializing part button
+        :param entity: object of class Entity(Engine, FuelTank, Cabin) from parts
+        :param pos: position on the screen
+        :param image: texture of the particular part
+        """
         Button.__init__(self, image, pos)
         self.entity = entity
 
     def update(self, screen):
         """
         Function, which adds part(button) to the screen
-        :param screen: main window
-        :return: none
+        :param screen: screen
         """
         self.rect = self.entity.texture.get_rect(center=(self.x_pos, self.y_pos))
         screen.blit(self.entity.texture, self.rect)
-
-
-def get_font(size):  # Returns Press-Start-2P in the desired size
-    return pygame.font.Font("Textures/menu/font.ttf", size)
 
 
 class Parts:
@@ -105,34 +130,40 @@ class Parts:
     Class of parts of a rocket, which are drawn on the sandbox_menu
     """
 
-    def __init__(self, x, y, window, rocket=None, text="Build rocket", size=50):
+    def __init__(self, x, y, screen, rocket=None, text="Build rocket", size=50):
+        """
+        Initializing a particular part of a rocket
+        :param x: x coordinate of image on the screen
+        :param y: y coordinate of image on the screen
+        :param screen: screen
+        :param rocket: object of class Rocket from sandbox
+        :param text: the name of a part
+        :param size: size of text, representing the part
+        """
         self.render = get_font(size).render(text, True, "#b68f40")
         self.rect = self.render.get_rect(center=(x, y))
-        self.window = window
+        self.screen = screen
         self.rocket = rocket
         self.arr = []
 
     def blit(self):
         """
         Function, which adds text on screen
-        :return:
         """
-        self.window.blit(self.render, self.rect)
+        self.screen.blit(self.render, self.rect)
 
     def update(self, size):
         """
-        Function, which adds all database of a particular part of a rocket to the screen
+        Function, which adds all database of a particular part of a particular size of a rocket to the screen
         :param size: width of a rocket
-        :return:
         """
         for element in self.arr:
             if (size == 0) or element.entity.texture.get_size()[0] == size:
-                element.update(self.window)
+                element.update(self.screen)
 
     def resize(self):
         """
         Function, which changes the size of an image of a part of a rocket
-        :return:
         """
         pass
 
@@ -142,8 +173,15 @@ class Cabin(Parts):
     Cabin class, inherited from class Parts
     """
 
-    def __init__(self, window, width, height, rocket):
-        Parts.__init__(self, int(width * 0.16), int(height / 12), window, rocket=rocket, text="Choose capsule", size=30)
+    def __init__(self, screen, width, height, rocket):
+        """
+        Initializing cabin class
+        :param screen: screen
+        :param width: screen width
+        :param height: screen height
+        :param rocket: object of class Rocket from sandbox
+        """
+        Parts.__init__(self, int(width * 0.16), int(height / 12), screen, rocket=rocket, text="Choose capsule", size=30)
         self.arr = [PartsButton(parts.Cabin(rocket.surface, mass=5000), pos=(int(width * 0.15), height / 4 - 50),
                                 image=pygame.image.load("Textures/capsule/final/capsule_270x180.png")),
                     PartsButton(parts.Cabin(rocket.surface, mass=3000), pos=(int(width * 0.15), height / 4 - 50),
@@ -152,17 +190,13 @@ class Cabin(Parts):
                                 image=pygame.image.load("Textures/capsule/final/capsule_270x180.png"))
                     ]
 
-
-
     def resize(self):
         """
         Resizes the size of Cabin parts.
-        :return: 
         """
         self.arr[0].entity.texture = pygame.transform.scale(self.arr[0].image, (80, 120))
         self.arr[1].entity.texture = pygame.transform.scale(self.arr[1].image, (60, 90))
         self.arr[2].entity.texture = pygame.transform.scale(self.arr[2].image, (40, 60))
-
 
 
 class Tanks(Parts):
@@ -170,8 +204,16 @@ class Tanks(Parts):
     Fuel tanks class, inherited from class Parts
     """
 
-    def __init__(self, window, width, height, rocket):
-        Parts.__init__(self, int(width * 0.20), int(height * 0.32), window, rocket=rocket, text="Choose fuel tanks(max 4)", size=25)
+    def __init__(self, screen, width, height, rocket):
+        """
+        Initializing fuel tanks class
+        :param screen: screen
+        :param width: screen width
+        :param height: screen height
+        :param rocket: object of class Rocket from sandbox
+        """
+        Parts.__init__(self, int(width * 0.20), int(height * 0.32), screen, rocket=rocket,
+                       text="Choose fuel tanks(max 4)", size=25)
 
         self.arr = [
             PartsButton(parts.FuelTank(rocket.surface, capacity=20000, mass=22000), pos=(int(width * 0.04), height / 2),
@@ -184,10 +226,9 @@ class Tanks(Parts):
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_180x240.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=40000, mass=44000), pos=(int(width * 0.12), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_270x240.png")),
-            PartsButton(parts.FuelTank(rocket.surface, capacity=550000, mass=60000), pos=(int(width * 0.20), height / 2),
+            PartsButton(parts.FuelTank(rocket.surface, capacity=550000, mass=60000),
+                        pos=(int(width * 0.20), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_360x240.png")),
-
-
             PartsButton(parts.FuelTank(rocket.surface, capacity=27000, mass=30000), pos=(int(width * 0.04), height / 2),
                         image=pygame.image.load("Textures/tanks/final/fuel_tank_270x120.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=35000, mass=39000), pos=(int(width * 0.12), height / 2),
@@ -198,7 +239,6 @@ class Tanks(Parts):
     def resize(self):
         """
         Resizes the size of Fuel Tank parts.
-        :return: 
         """
         self.arr[0].entity.texture = pygame.transform.scale(self.arr[0].image, (60, 60))
         self.arr[1].entity.texture = pygame.transform.scale(self.arr[1].image, (60, 90))
@@ -215,8 +255,16 @@ class Engines(Parts):
     Engines class, inherited from class Parts
     """
 
-    def __init__(self, window, width, height, rocket):
-        Parts.__init__(self, int(width * 0.16), int(height * 0.64), window, rocket=rocket, text="Choose engine", size=30)
+    def __init__(self, screen, width, height, rocket):
+        """
+        Initializing engines class
+        :param screen: screen
+        :param width: screen width
+        :param height: screen height
+        :param rocket: object of class Rocket from sandbox
+        """
+        Parts.__init__(self, int(width * 0.16), int(height * 0.64), screen, rocket=rocket, text="Choose engine",
+                       size=30)
 
         self.arr = [PartsButton(parts.Engine(rocket.surface, power=10000, consumption=1, mass=3000),
                                 pos=(int(width * 0.04), 3 * height / 4),
@@ -232,7 +280,6 @@ class Engines(Parts):
     def resize(self):
         """
         Resizes the size of Engine parts.
-        :return: 
         """
         self.arr[0].entity.texture = pygame.transform.scale(self.arr[0].image, (40, 60))
         self.arr[1].entity.texture = pygame.transform.scale(self.arr[1].image, (60, 90))
@@ -244,7 +291,6 @@ def upload_parts(arr, size):
     Changing and placing all images on to the screen
     :param arr: array of parts of a rocket
     :param size: texture width, used to choose right parts in terms of rocket width
-    :return: none
     """
     for part in arr:
         part.resize()
@@ -258,7 +304,6 @@ def upload_text(arr, mouse_pos, screen):
     :param arr: array of text buttons
     :param mouse_pos: mouse position
     :param screen: screen
-    :return: none
     """
     for part in arr:
         part.change_color(mouse_pos)
@@ -293,10 +338,40 @@ def music_buttons_control(events, text_array):
                     pygame.mixer.music.unpause()
 
 
-def gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_array, part_choose):
+def gameplay_check_events(screen, events, mouse_pos, text, rocket, parts_arr, part_choose, flag):
+    for event in events:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if text[0].check_for_input(mouse_pos):
+                flag = "play menu"
+                screen.fill((0, 0, 0, 0))
+            if text[1].check_for_input(mouse_pos):
+                part_choose = ["engine", 0]
+                rocket.parts.clear()
+                rocket.surface = pygame.Surface([rocket.width, rocket.height], pygame.SRCALPHA)
+            if text[2].check_for_input(mouse_pos):
+                flag = "main menu"
+            for segments in parts_arr:
+                for part in segments.arr:
+                    if part.check_for_input(mouse_pos) and (
+                            (part_choose[1] == 0) or (part.entity.texture.get_size()[0] == part_choose[1])):
+                        match part_choose[0]:
+                            case "engine":
+                                part_choose[1] = part.entity.texture.get_size()[0]
+                                part_choose[0] = "capsule"
+                            case "capsule":
+                                part_choose[0] = "fuel tank"
+                        rocket.add_part(part.entity)
+
+    return flag, part_choose, rocket
+
+
+def gameplay_buttons_control(screen, flag, width, height, rocket, events, text_array, part_choose):
     """
      The function performs the exact game actions when corresponding button is clicked.
-    :param SCREEN:
+    :param screen:
     :param flag:
     :param width:
     :param height:
@@ -304,15 +379,14 @@ def gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_a
     :param events:
     :param text_array:
     :param part_choose:
-    :return:
     """
 
     menu_mouse_pos = pygame.mouse.get_pos()
 
-    create_rocket = Parts(width / 2, 40, SCREEN)
-    capsule = Cabin(SCREEN, width, height, rocket=rocket)
-    tanks = Tanks(SCREEN, width, height, rocket=rocket)
-    engines = Engines(SCREEN, width, height, rocket=rocket)
+    create_rocket = Parts(width / 2, 40, screen)
+    capsule = Cabin(screen, width, height, rocket=rocket)
+    tanks = Tanks(screen, width, height, rocket=rocket)
+    engines = Engines(screen, width, height, rocket=rocket)
     parts_array = [create_rocket]
     match part_choose[0]:
         case "engine":
@@ -324,32 +398,7 @@ def gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_a
 
     upload_parts(parts_array, part_choose[1])
 
-    play_button, restart_button, back_button = text_array[0], text_array[1], text_array[2]
-
-    for event in events:
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if play_button.check_for_input(menu_mouse_pos):
-                flag = "play menu"
-                SCREEN.fill((0, 0, 0, 0))
-            if restart_button.check_for_input(menu_mouse_pos):
-                part_choose = ["engine", 0]
-                rocket.parts.clear()
-                rocket.surface = pygame.Surface([rocket.width, rocket.height], pygame.SRCALPHA)
-            if back_button.check_for_input(menu_mouse_pos):
-                flag = "main menu"
-            for segments in parts_array:
-                for part in segments.arr:
-                    if part.check_for_input(menu_mouse_pos) and ((part_choose[1] == 0) or (part.entity.texture.get_size()[0] == part_choose[1])):
-                        match part_choose[0]:
-                            case "engine":
-                                part_choose[1] = part.entity.texture.get_size()[0]
-                                part_choose[0] = "capsule"
-                            case "capsule":
-                                part_choose[0] = "fuel tank"
-                        rocket.add_part(part.entity)
+    flag, part_choose, rocket = gameplay_check_events(screen, events, menu_mouse_pos, text_array, rocket, parts_array, part_choose, flag)
 
     return flag, part_choose
 
@@ -358,8 +407,7 @@ def text_buttons_define(width, height):
     """
     Defines and creates 5 buttons: 3 for gameplay, 2 for playing music
     :param width: 
-    :param height: 
-    :return: 
+    :param height:
     """
     play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 100), text_input="PLAY")
@@ -388,13 +436,12 @@ def sandbox(SCREEN, flag, width, height, rocket, events, part_choose):
     :param rocket:
     :param events:
     :param part_choose:  part of a rocket, which is being selected in this particular moment, with the size of a texture
-    :return:
     """
     SCREEN.blit(BG, (0, 0))
 
     menu_mouse_pos = pygame.mouse.get_pos()
 
-    text_array = text_buttons_define(width, height)  # FIXME: Миша так можно?
+    text_array = text_buttons_define(width, height)
     upload_text(text_array, menu_mouse_pos, SCREEN)
 
     flag, part_choose = gameplay_buttons_control(SCREEN, flag, width, height, rocket, events, text_array, part_choose)

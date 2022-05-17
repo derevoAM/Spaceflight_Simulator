@@ -17,21 +17,24 @@ window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.update()
 window_width, window_height = pygame.display.get_surface().get_size()
 
-# Initialize a rocket
 rocket = sandbox.Rocket()
 
-# Initialize play surface
 Rocket_surface = draw_screen.RocketView(window_width, window_height, rocket)
 Space_surface = draw_screen.SpaceView(window_width, window_height, rocket)
 Parameters_surface = draw_screen.ParametersView(window_width, window_height, rocket)
 Views = [Rocket_surface, Space_surface, Parameters_surface]
+
+rocket_engine = None
+
+flag_turn = "None"
+flag_power = "None"
+part_size = ["engine", 0]
 
 
 def draw_everything(engine):
     """
     Drawing play menu, which include 3 views
     :param engine: object of class PhysicsEngine from trajectory_calculation
-    :return: none
     """
     for view in Views:
         view.set_engine(engine)
@@ -113,7 +116,6 @@ def rocket_power(eve, power):
     Analyzing keyboard inputs and controlling rocket power
     :param eve: events
     :param power: flag that shows whether Shift(increase speed) or CTRL(reduce speed) was pressed
-    :return:
     """
     if (power == "increase") and (rocket_engine.rocket_parameters.engine_power < 100):
         rocket_engine.rocket_parameters.engine_power += 2
@@ -161,12 +163,6 @@ def displaying_menu(menu, part_type, obj, engine, start, turn, power, eve):
 
     return menu, part_type, obj, engine, start, turn, power
 
-
-rocket_engine = None
-
-flag_turn = "None"
-flag_power = "None"
-part_size = ["engine", 0]
 
 while not finished:
     clock.tick(FPS)
