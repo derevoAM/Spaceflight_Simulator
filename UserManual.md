@@ -1,3 +1,7 @@
+Credits:
+
+-- press Q to exit credits video
+
 Sandbox:
 
 -- firstly, choose engine, capsule and fuel tanks. Make sure you do not choose more than 4 fuel tanks;
