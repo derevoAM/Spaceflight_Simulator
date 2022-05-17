@@ -89,17 +89,6 @@ class ButtonText(Button):
         """
         screen.blit(self.text, self.text_rect)
 
-    def change_color(self, position):
-        """
-        Changes the text color of a button if the mouse pointer is located on a button. 
-        :param position: mouse position
-        """
-        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
-                                                                                          self.rect.bottom):
-            self.text = self.font.render(self.text_input, True, self.hovering_color)
-        else:
-            self.text = self.font.render(self.text_input, True, self.base_color)
-
 
 class PartsButton(Button):
     """
@@ -298,21 +287,19 @@ def upload_parts(arr, size):
         part.update(size)
 
 
-def upload_text(arr, mouse_pos, screen):
+def upload_text(arr, screen):
     """
     Placing all texts buttons on to the screen
     :param arr: array of text buttons
-    :param mouse_pos: mouse position
     :param screen: screen
     """
     for part in arr:
-        part.change_color(mouse_pos)
         part.update(screen)
 
 
 def music_buttons_control(events, text_array):
     """
-    The function plays, pauses, or continues to play music if corresponding button is clicked.
+    The function plays, pauses, or continues to play music if corresponding button is clicked
     :param events: events
     :param text_array: text buttons
     """
@@ -343,7 +330,7 @@ def gameplay_check_events(screen, events, mouse_pos, text, rocket, parts_arr, pa
     :param screen: screen
     :param events: events
     :param mouse_pos: mouse position
-    :param text: type of a part
+    :param text: type of part
     :param rocket: object of class Rocket from sandbox
     :param parts_arr: array of displayed parts
     :param part_choose: array of a part of a rocket, which is being selected in this particular moment, and its width
@@ -381,7 +368,7 @@ def gameplay_check_events(screen, events, mouse_pos, text, rocket, parts_arr, pa
 
 def gameplay_buttons_control(screen, menu, width, height, rocket, events, text_array, part_choose):
     """
-     The function performs the exact game actions when corresponding button is clicked.
+     The function performs the exact game actions when corresponding button is clicked
     :param screen: screen
     :param menu: type of menu: main menu, sandbox menu, play menu
     :param width: screen width
@@ -453,10 +440,8 @@ def sandbox(screen, menu, width, height, rocket, events, part_choose):
     """
     screen.blit(BG, (0, 0))
 
-    menu_mouse_pos = pygame.mouse.get_pos()
-
     text_array = text_buttons_define(width, height)
-    upload_text(text_array, menu_mouse_pos, screen)
+    upload_text(text_array, screen)
 
     menu, part_choose = gameplay_buttons_control(screen, menu, width, height, rocket, events, text_array, part_choose)
     music_buttons_control(events, text_array)
