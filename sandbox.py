@@ -1,4 +1,5 @@
 import pygame
+
 import parts as p
 import trajectory_calculation
 
@@ -14,7 +15,8 @@ class Rocket:
         initializes characteristics
         """
         self.width = 100
-        self.surface = pygame.Surface([100, 800], pygame.SRCALPHA)
+        self.height = 900
+        self.surface = pygame.Surface([100, 900], pygame.SRCALPHA)
         self.angle = -90
         self.parts = []
         self.engine_bottom = 0
@@ -147,8 +149,6 @@ def save_rocket(rocket_entity, outfile):
         for part_entity in rocket_entity.parts:
             file.write(str(part_entity.type) + " " + str(part_entity.x) + " " + str(part_entity.y) + "\n")
 
-
-## Тестирую на совместимость!
 
 if __name__ == "__main__":
     print("this module is not for direct use")

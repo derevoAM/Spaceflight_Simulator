@@ -1,19 +1,21 @@
-import pygame
-import sys
-import parts
 import random
+import sys
 
-BG = pygame.image.load("Textures/sandbox_menu/sandbox_back.png")
+import pygame
+
+import parts
+
+BG = pygame.image.load("textures/sandbox_menu/sandbox_back.png")
 
 pygame.mixer.init()
 playlist = [
-    "Textures/music/Trava_u_doma.mp3",
-    "Textures/music/Star_finder.mp3",
-    "Textures/music/Fly_Me_To_The_Moon.mp3",
-    "Textures/music/Counting_Stars.mp3",
-    "Textures/music/Boyfriend.mp3",
-    "Textures/music/My_Way.mp3",
-    "Textures/music/Stop.mp3",
+    "textures/music/Trava_u_doma.mp3",
+    "textures/music/Star_finder.mp3",
+    "textures/music/Fly_Me_To_The_Moon.mp3",
+    "textures/music/Counting_Stars.mp3",
+    "textures/music/Boyfriend.mp3",
+    "textures/music/My_Way.mp3",
+    "textures/music/Stop.mp3",
 ]
 
 
@@ -23,7 +25,7 @@ def get_font(size):  # Returns Press-Start-2P in the desired size
     :param size: font size
     :return:
     """
-    return pygame.font.Font("Textures/menu/font.ttf", size)
+    return pygame.font.Font("textures/menu/font.ttf", size)
 
 
 class Button:
@@ -172,11 +174,11 @@ class Cabin(Parts):
         """
         Parts.__init__(self, int(width * 0.16), int(height / 12), screen, rocket=rocket, text="Choose capsule", size=30)
         self.arr = [PartsButton(parts.Cabin(rocket.surface, mass=5000), pos=(int(width * 0.15), height / 4 - 50),
-                                image=pygame.image.load("Textures/capsule/final/capsule_270x180.png")),
+                                image=pygame.image.load("textures/capsule/final/capsule_270x180.png")),
                     PartsButton(parts.Cabin(rocket.surface, mass=3000), pos=(int(width * 0.15), height / 4 - 50),
-                                image=pygame.image.load("Textures/capsule/final/capsule_270x180.png")),
+                                image=pygame.image.load("textures/capsule/final/capsule_270x180.png")),
                     PartsButton(parts.Cabin(rocket.surface, mass=1500), pos=(int(width * 0.15), height / 4 - 50),
-                                image=pygame.image.load("Textures/capsule/final/capsule_270x180.png"))
+                                image=pygame.image.load("textures/capsule/final/capsule_270x180.png"))
                     ]
 
     def resize(self):
@@ -206,22 +208,22 @@ class Tanks(Parts):
 
         self.arr = [
             PartsButton(parts.FuelTank(rocket.surface, capacity=20000, mass=22000), pos=(int(width * 0.04), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_180x180.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_180x180.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=35000, mass=38500), pos=(int(width * 0.12), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_270x180.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_270x180.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=45000, mass=49500), pos=(int(width * 0.20), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_360x180.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_360x180.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=30000, mass=33000), pos=(int(width * 0.04), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_180x240.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_180x240.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=40000, mass=44000), pos=(int(width * 0.12), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_270x240.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_270x240.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=550000, mass=60000),
                         pos=(int(width * 0.20), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_360x240.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_360x240.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=27000, mass=30000), pos=(int(width * 0.04), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_270x120.png")),
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_270x120.png")),
             PartsButton(parts.FuelTank(rocket.surface, capacity=35000, mass=39000), pos=(int(width * 0.12), height / 2),
-                        image=pygame.image.load("Textures/tanks/final/fuel_tank_360x120.png"))
+                        image=pygame.image.load("textures/tanks/final/fuel_tank_360x120.png"))
 
         ]
 
@@ -257,13 +259,13 @@ class Engines(Parts):
 
         self.arr = [PartsButton(parts.Engine(rocket.surface, power=10000, consumption=1, mass=3000),
                                 pos=(int(width * 0.04), 3 * height / 4),
-                                image=pygame.image.load("Textures/engines/final/engine_180x120.png")),
+                                image=pygame.image.load("textures/engines/final/engine_180x120.png")),
                     PartsButton(parts.Engine(rocket.surface, power=20000, consumption=3, mass=5000),
                                 pos=(int(width * 0.10), 3 * height / 4),
-                                image=pygame.image.load("Textures/engines/final/engine_270x180.png")),
+                                image=pygame.image.load("textures/engines/final/engine_270x180.png")),
                     PartsButton(parts.Engine(rocket.surface, power=40000, consumption=7, mass=9000),
                                 pos=(int(width * 0.16), 3 * height / 4),
-                                image=pygame.image.load("Textures/engines/final/engine_360x240.png"))
+                                image=pygame.image.load("textures/engines/final/engine_360x240.png"))
                     ]
 
     def resize(self):
@@ -409,18 +411,18 @@ def text_buttons_define(width, height):
     :param width: screen width
     :param height: screen height
     """
-    play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+    play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 100), text_input="PLAY")
     restart_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (190, 20)),
+        image=pygame.transform.scale(pygame.image.load("textures/menu/Play Rect.png"), (190, 20)),
         pos=(width - 100, height - 150), text_input="RESTART")
-    back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+    back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 50), text_input="BACK")
     play_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
+        image=pygame.transform.scale(pygame.image.load("textures/menu/Play Rect.png"), (350, 40)),
         pos=(width - 225, 50), text_input="Play Random Song")
     pause_music_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (350, 40)),
+        image=pygame.transform.scale(pygame.image.load("textures/menu/Play Rect.png"), (350, 40)),
         pos=(width - 225, 100), text_input="Pause/Continue")
 
     return [play_button, restart_button, back_button, play_music_button, pause_music_button]

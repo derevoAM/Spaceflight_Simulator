@@ -175,12 +175,13 @@ while not finished:
 
     events = pygame.event.get()
 
-    flag_menu, part_size, rocket, rocket_engine, flag_start, flag_turn, flag_power, finished = displaying_menu(flag_menu,
-                                                                                                     part_size, rocket,
-                                                                                                     rocket_engine,
-                                                                                                     flag_start,
-                                                                                                     flag_turn,
-                                                                                                     flag_power, events, finished)
+    flag_menu, part_size, rocket, rocket_engine, flag_start, flag_turn, flag_power, finished = displaying_menu(
+        flag_menu,
+        part_size, rocket,
+        rocket_engine,
+        flag_start,
+        flag_turn,
+        flag_power, events, finished)
 
     for event in events:
         if event.type == pygame.QUIT:

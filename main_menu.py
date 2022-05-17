@@ -2,9 +2,9 @@ import pygame
 import sys
 import cv2
 
-BG = pygame.image.load("Textures/menu/background.png")
+BG = pygame.image.load("textures/menu/background.png")
 """Uploads background picture"""
-pygame.mixer.music.load("Textures/music/Star_finder.mp3")
+pygame.mixer.music.load("textures/music/Star_finder.mp3")
 """Uploads background music"""
 pygame.mixer.music.play(loops=0)
 """Plays the music"""
@@ -72,16 +72,16 @@ def get_font(size):
     """
     Returns font with exact size
     :param size: size of font
-    :return: pygame.font.Font("Textures/menu/font.ttf", size)
+    :return: pygame.font.Font("textures/menu/font.ttf", size)
     """
-    return pygame.font.Font("Textures/menu/font.ttf", size)
+    return pygame.font.Font("textures/menu/font.ttf", size)
 
 
 def play_video():
     """
     When CREDITS is clicked plays video.
     """
-    file_name = "Textures/credits/sw-3000.mp4"
+    file_name = "textures/credits/sw-3000.mp4"
     window_name = "window"
     inter_frame_wait_ms = 5
 
@@ -115,13 +115,13 @@ def buttons_define(screen, coef_w, coef_h):
     rect = text.get_rect(center=(960 * coef_w, 150 * coef_h))
     screen.blit(text, rect)
 
-    play_button = Button(image=pygame.image.load("Textures/menu/Play Rect.png"),
+    play_button = Button(image=pygame.image.load("textures/menu/Play Rect.png"),
                          pos=(960 * coef_w, 375 * coef_h),
                          text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-    credits_button = Button(image=pygame.image.load("Textures/menu/Options Rect.png"),
+    credits_button = Button(image=pygame.image.load("textures/menu/Options Rect.png"),
                             pos=(960 * coef_w, 600 * coef_h),
                             text_input="CREDITS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-    quit_button = Button(image=pygame.image.load("Textures/menu/Quit Rect.png"),
+    quit_button = Button(image=pygame.image.load("textures/menu/Quit Rect.png"),
                          pos=(960 * coef_w, 825 * coef_h),
                          text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
     return play_button, credits_button, quit_button
@@ -154,7 +154,7 @@ def main_menu(screen, menu):
                 menu = "sandbox menu"
                 screen.fill((0, 0, 0, 0))
             if credits_button.check_for_input(menu_mouse_pos):
-                pygame.mixer.music.load("Textures/music/credits.mp3")
+                pygame.mixer.music.load("textures/music/credits.mp3")
                 pygame.mixer.music.play(loops=0)
                 play_video()
                 pygame.mixer.music.stop()

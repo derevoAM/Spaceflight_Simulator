@@ -1,6 +1,3 @@
-import pygame
-
-
 class Entity:
     """
     Just a class whose object will be statically drawn on the rocket
