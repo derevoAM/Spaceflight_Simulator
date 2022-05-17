@@ -9,19 +9,19 @@ WHITE = [255, 255, 255]
 RED = [255, 0, 0]
 
 
-def blit_rotate(surf, image, pos, originPos, angle):
+def blit_rotate(surf, image, pos, origin_pos, angle):
     """
     In the following example program, the function blitRotate(surf, image, pos, originPos, angle) does all
     the above steps and "blit" a rotated image to a surface.
     :param surf is the target Surface
     :param image is the Surface which has to be rotated and blit
     :param pos is the position of the pivot on the target Surface surf (relative to the top left of surf)
-    :param originPos is position of the pivot on the image Surface (relative to the top left of image)
+    :param origin_pos is position of the pivot on the image Surface (relative to the top left of image)
     :param angle is the angle of rotation in degrees
     The 2nd argument (pos) of blitRotate is the position of the pivot point in the window and the
     3rd argument (originPos) is the position of the pivot point on the rotating Surface:
     """
-    image_rect = image.get_rect(topleft=(pos[0] - originPos[0], pos[1] - originPos[1]))
+    image_rect = image.get_rect(topleft=(pos[0] - origin_pos[0], pos[1] - origin_pos[1]))
     offset_center_to_pivot = pygame.math.Vector2(pos) - image_rect.center
     rotated_offset = offset_center_to_pivot.rotate(-angle)
     rotated_image_center = (pos[0] - rotated_offset.x, pos[1] - rotated_offset.y)
@@ -154,17 +154,17 @@ class ParametersView(View):
         """
         Drawing rectangles, which show how much fuel is left and current power of a rocket
         """
-        pygame.draw.rect(self.surface, BLACK, (self.width / 2 - 20, 190, 300, 40), width=1)
-        pygame.draw.rect(self.surface, GREEN, (
+        pygame.draw.rect(self.surface, BLACK, [self.width / 2 - 20, 190, 300, 40], width=1)
+        pygame.draw.rect(self.surface, GREEN, [
             self.width / 2 - 19, 191,
             298 * self.engine.rocket_parameters.fuel_remained / self.rocket.get_active_parameters()[4],
-            38))
+            38])
 
-        pygame.draw.rect(self.surface, BLACK, (self.width / 2 - 10, 240, 300, 40), width=1)
-        pygame.draw.rect(self.surface, RED, (
+        pygame.draw.rect(self.surface, BLACK, [self.width / 2 - 10, 240, 300, 40], width=1)
+        pygame.draw.rect(self.surface, RED, [
             self.width / 2 - 9, 241,
             298 * self.engine.rocket_parameters.engine_power / 100,
-            38))
+            38])
 
     def draw(self):
         """

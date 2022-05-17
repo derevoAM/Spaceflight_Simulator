@@ -57,7 +57,7 @@ class Button:
 
     def change_color(self, position):
         """
-        Changes the color of button text when the mouse is on a button.
+        Changes the color of button text when the mouse is on a button
         :param position: position of a mouse on the screen
         """
 
