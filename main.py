@@ -17,7 +17,7 @@ window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.update()
 window_width, window_height = pygame.display.get_surface().get_size()
 
-rocket = sandbox.Rocket()
+rocket = rocket.Rocket()
 
 Rocket_surface = draw_screen.RocketView(window_width, window_height, rocket)
 Space_surface = draw_screen.SpaceView(window_width, window_height, rocket)
