@@ -86,8 +86,10 @@ class RocketView(View):
         """
         self.surface.fill((0, 0, 0, 0))
         self.surface.blit(pygame.image.load("Textures/View_background/stars.jpg"), (0, 0))
-        self.rocket.recount()
-        self.rocket.draw(self.engine.rocket_parameters.engine_power)
+        if self.engine.rocket_parameters.fuel_remained <= 0:
+            self.rocket.draw(0)
+        else:
+            self.rocket.draw(self.engine.rocket_parameters.engine_power)
         h = 0
         for part in self.rocket.parts:
             h += (part.texture.get_size()[1] / 1.5)
