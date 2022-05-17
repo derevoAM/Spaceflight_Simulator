@@ -34,7 +34,8 @@ def draw_everything(engine):
     :return: none
     """
     for view in Views:
-        view.draw(engine)
+        view.set_engine(engine)
+        view.draw()
         window.blit(view.surface, (view.x, view.y))
 
 
@@ -57,7 +58,7 @@ def menu_type(flag, obj, part_type):
 def play_menu(obj, engine, start):
     """
     Function, which initializes, processes rocket parameters and calculate new step
-    :param obj: object of class Rocket from sandbox file
+    :param obj: object of class Rocket from sandbox
     :param engine: object of class PhysicsEngine from trajectory_calculation
     :param start: flag, that shows whether rocket was launched
     :return: obj, engine
@@ -143,7 +144,7 @@ def displaying_menu(menu, part_type, obj, engine, start, turn, power, eve):
     Function, which is responsible for everything related to menus
     :param menu: type of menu: main menu, sandbox menu, play menu
     :param part_type: array of a part of a rocket, which is being selected in this particular moment, and its width
-    :param obj:  object of class Rocket from sandbox file
+    :param obj:  object of class Rocket from sandbox
     :param engine: object of class PhysicsEngine from trajectory_calculation
     :param start: flag that shows whether rocket was launched
     :param turn: flag that shows whether right or left arrow was pressed

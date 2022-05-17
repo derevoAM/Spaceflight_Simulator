@@ -1,5 +1,3 @@
-# Calculating the trajectory of a rocket
-
 import numpy as np
 
 
@@ -47,7 +45,7 @@ class RocketParameters:
         self.current_time = 0.0
         self.predicative_orbit = np.ndarray(shape=(0, 4), dtype=float)
 
-        self.current_stage_mass = initial_rocket_mass  # масса ступени текущая
+        self.current_stage_mass = initial_rocket_mass
         self.fuel_remained = tanks_fullness
         self.engine_power = 1.0
 
