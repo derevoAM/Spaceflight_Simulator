@@ -85,21 +85,4 @@ class Cabin(Entity):
 
 
 if __name__ == "__main__":
-    # Код для первичной проверки работы
-    screen = pygame.display.set_mode((900, 900))
-    rocket_image = pygame.Surface([400, 500], pygame.SRCALPHA)
-    engine = Engine(screen, x=200, y=100)
-    engine.texture = pygame.image.load("textures/engines/big_engine_100x75.png")
-    engine.draw()
-    print(engine.texture.get_height())
-    pygame.display.update()
-    clock = pygame.time.Clock()
-    finished = False
-
-    while not finished:
-        clock.tick(60)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                finished = True
-
-    pygame.quit()
+    print("this module is not for direct use")
