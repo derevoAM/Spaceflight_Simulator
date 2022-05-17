@@ -85,7 +85,7 @@ class RocketView(View):
         Drawing rocket on a RocketView surface according to its direction
         """
         self.surface.fill((0, 0, 0, 0))
-        self.surface.blit(pygame.image.load("Textures/View_background/stars.jpg"), (0, 0))
+        self.surface.blit(pygame.image.load("textures/View_background/stars.jpg"), (0, 0))
         if self.engine.rocket_parameters.fuel_remained <= 0:
             self.rocket.draw(0)
         else:
