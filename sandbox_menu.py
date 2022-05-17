@@ -425,7 +425,7 @@ def text_buttons_define(width, height):
     play_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 100), text_input="PLAY")
     restart_button = ButtonText(
-        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
+        image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (190, 20)),
         pos=(width - 100, height - 150), text_input="RESTART")
     back_button = ButtonText(image=pygame.transform.scale(pygame.image.load("Textures/menu/Play Rect.png"), (100, 20)),
                              pos=(width - 100, height - 50), text_input="BACK")

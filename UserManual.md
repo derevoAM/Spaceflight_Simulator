@@ -10,6 +10,8 @@ Sandbox:
 
 -- press play when the rocket is assembled;
 
+-- to EXIT the program press escape key
+
 
 First launch:
 
@@ -22,3 +24,5 @@ Flight controls:
 -- use left shift/ctrl to increase/decrease engine thrust power;
 
 -- use left/right arrow keys to turn the rocket;
+
+-- to EXIT the program press escape key
