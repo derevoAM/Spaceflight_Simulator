@@ -1,6 +1,6 @@
 import pygame
 import sys
-import cv2
+#import cv2
 
 BG = pygame.image.load("Textures/menu/background.png")
 """Uploads background picture"""
@@ -17,15 +17,6 @@ class Button:
     """
 
     def __init__(self, image, pos, text_input, font, base_color, hovering_color):
-        """
-        Button class costructor
-        x_pos, y_pos - center coordinates
-        text_input - text on the button
-        image - texture of the button's background
-        font - pygame.font object
-        base_color - text color
-        hovering_color - text color when there is a mouse on the button
-        """
         self.image = image
         self.x_pos = pos[0]
         self.y_pos = pos[1]
@@ -42,6 +33,7 @@ class Button:
         """
         Drawing buttons on the screen
         :param screen: screen
+        :return: None
         """
         if self.image is not None:
             screen.blit(self.image, self.rect)
@@ -51,6 +43,7 @@ class Button:
         """
         Checking whether the button was clicked on
         :param position:
+        :return: None
         """
         return position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
                                                                                               self.rect.bottom)
@@ -60,6 +53,7 @@ class Button:
         Changes the color of button text when the mouse is on a button.
 
         :param position: position of a mouse on the screen
+        :return: None
         """
 
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
@@ -81,6 +75,7 @@ def get_font(size):
 def play_video():
     """
     When CREDITS is clicked plays video.
+    :return none:
     """
     file_name = "Textures/credits/sw-3000.mp4"
     window_name = "window"
@@ -111,6 +106,7 @@ def buttons_define(screen, coef_w, coef_h):
     :param screen: screen
     :param coef_w: used for width scale depending on users screen parameters
     :param coef_h: used for height scale depending on users screen parameters
+    :return:
     """
     text = get_font(100).render("MAIN MENU", True, "#b68f40")
     rect = text.get_rect(center=(960 * coef_w, 150 * coef_h))
@@ -133,6 +129,7 @@ def main_menu(screen, menu):
     Main function of main_menu.py.
     :param screen: screen
     :param menu: type of menu: main menu, sandbox menu, play menu
+    :return:
     """
     screen.blit(BG, (0, 0))
     coefficient_w = screen.get_size()[0] / 1920

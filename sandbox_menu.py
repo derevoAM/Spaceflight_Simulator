@@ -19,9 +19,9 @@ playlist = [
 
 def get_font(size):  # Returns Press-Start-2P in the desired size
     """
-    Returns font with exact size
+    Returns
     :param size: font size
-    :return: pygame.font.Font("Textures/menu/font.ttf", size)
+    :return:
     """
     return pygame.font.Font("Textures/menu/font.ttf", size)
 
