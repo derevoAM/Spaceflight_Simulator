@@ -14,7 +14,8 @@ class Rocket:
         initializes characteristics
         """
         self.width = 100
-        self.surface = pygame.Surface([100, 800], pygame.SRCALPHA)
+        self.height = 900
+        self.surface = pygame.Surface([100, 900], pygame.SRCALPHA)
         self.angle = -90
         self.parts = []
         self.engine_bottom = 0
